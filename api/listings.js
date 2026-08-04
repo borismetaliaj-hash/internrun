@@ -168,6 +168,14 @@ const CURATED = [
 let liveCache = { items: [], fetchedAt: 0 };
 const LIVE_TTL_MS = 10 * 60 * 1000; // 10 minutes
 
+// html-to-text renders EU Careers' headings in ALL CAPS. Convert shouty titles to a
+// readable case; leave anything that isn't fully uppercase (unlikely here) untouched.
+function toTitleCase(str) {
+  if (!str) return str;
+  if (str !== str.toUpperCase()) return str;
+  return str.toLowerCase().replace(/(^|[\s\-(/])([a-z])/g, (m0, sep, ch) => sep + ch.toUpperCase());
+}
+
 async function fetchEuCareersHighlights() {
   const now = Date.now();
   if (liveCache.items.length && now - liveCache.fetchedAt < LIVE_TTL_MS) {
@@ -194,8 +202,14 @@ async function fetchEuCareersHighlights() {
       // Title is whatever text sits between the end of the previous match and the start of this
       // "Deadline:" — bounding org against the known institution list (above) means that text is
       // unambiguous, unlike a plain lazy-match which bleeds into the next entry's title.
-      const titleZone = flat.slice(lastEnd, m.index).trim().replace(/^Highlights\s+/i, '');
-      const title = titleZone.split(' ').slice(-12).join(' ').trim();
+      const rawZone = flat.slice(lastEnd, m.index).trim();
+      // The zone before the first match can include page intro copy and a "Highlights" section
+      // heading (e.g. "...agencies below ---- HIGHLIGHTS EIGE ..."). Cut everything up to and
+      // including the LAST "Highlights" occurrence anywhere in the zone, not just a leading one.
+      const hiIdx = rawZone.toLowerCase().lastIndexOf('highlights');
+      const cutZone = hiIdx >= 0 ? rawZone.slice(hiIdx + 'highlights'.length).trim() : rawZone;
+      const titleZone = cutZone.replace(/^-+\s*/, '');
+      const title = toTitleCase(titleZone.split(' ').slice(-12).join(' ').trim());
       lastEnd = blockRe.lastIndex;
       if (!title || title.length < 4) continue;
       items.push({
