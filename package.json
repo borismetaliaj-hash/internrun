@@ -1,0 +1,9 @@
+{
+  "name": "internrun",
+  "version": "0.1.0",
+  "private": true,
+  "description": "InternRun -- internship listings across Europe, in one place.",
+  "dependencies": {
+    "html-to-text": "^9.0.5"
+  }
+}
