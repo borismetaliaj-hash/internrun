@@ -91,6 +91,12 @@ const CURATED = [
   { id: 'eucareers-all', title: 'All EU institutions, agencies & bodies', org: 'EU Careers (EPSO)', category: 'eu',
     location: 'Across the EU', note: 'Central directory covering 50+ EU agencies and bodies at once',
     url: 'https://eu-careers.europa.eu/en/job-opportunities/traineeships' },
+  { id: 'eib', title: 'Traineeships at the EIB', org: 'European Investment Bank', category: 'eu',
+    location: 'Luxembourg', note: 'Around €1,500/month · two intakes a year, Mar-Apr & Sep-Oct',
+    url: 'https://www.eib.org/en/about/careers/categories/traineeships/index' },
+  { id: 'frontex', title: 'Blue Book Traineeship', org: 'Frontex', category: 'eu',
+    location: 'Warsaw, Poland', note: 'Paid 5-month traineeship, ~€1,476/month · up to 60 places/year',
+    url: 'https://www.frontex.europa.eu/careers/traineeships/' },
 
   // --- Tech ---
   { id: 'google', title: 'Software Engineering & STEP Internships', org: 'Google', category: 'tech',
@@ -108,6 +114,18 @@ const CURATED = [
   { id: 'asml', title: 'Internship Programme', org: 'ASML', category: 'tech',
     location: 'Veldhoven, Netherlands', note: 'Deep-tech / semiconductor internships, rolling intake',
     url: 'https://www.asml.com/en/careers/students' },
+  { id: 'amazon', title: 'Student Internship Programme', org: 'Amazon', category: 'tech',
+    location: 'London, Munich, Paris, Madrid & more', note: "Tech, ops & business tracks, open to Bachelor's/Master's/PhD students",
+    url: 'https://amazon.jobs/content/en/career-programs/university-ops/eu-students-internship' },
+  { id: 'meta', title: 'Software & Production Engineering Internship', org: 'Meta', category: 'tech',
+    location: 'London, Dublin', note: '12-24 week internships, multiple start dates a year',
+    url: 'https://www.metacareers.com/students-and-grads/' },
+  { id: 'booking', title: 'Compass Internship Programme', org: 'Booking.com', category: 'tech',
+    location: 'Amsterdam, Netherlands', note: '9-week or 5-6 month tracks for students at Dutch universities',
+    url: 'https://careers.booking.com/early-careers/' },
+  { id: 'siemens', title: 'Consulting Internship (Siemens Advanta)', org: 'Siemens', category: 'tech',
+    location: 'Munich, Germany & offices EU-wide', note: '10+ week placements in digital transformation consulting, rolling intake',
+    url: 'https://www.siemens-advanta.com/careers/consulting/internship' },
 
   // --- Finance & Consulting ---
   { id: 'gs', title: 'Summer Analyst Programme', org: 'Goldman Sachs', category: 'finance',
@@ -122,6 +140,12 @@ const CURATED = [
   { id: 'unilever', title: 'Future Leaders Internship', org: 'Unilever', category: 'finance',
     location: 'London, Rotterdam & more', note: 'Marketing, finance & supply chain tracks',
     url: 'https://www.unilever.com/careers/graduates-and-internships/' },
+  { id: 'jpmorgan', title: 'Summer Analyst & Software Engineer Programmes', org: 'J.P. Morgan', category: 'finance',
+    location: 'London & EMEA offices', note: '10-12 week internships across markets, tech & banking',
+    url: 'https://www.jpmorganchase.com/careers/explore-opportunities/students-and-graduates' },
+  { id: 'bcg', title: 'Summer Internship', org: 'Boston Consulting Group', category: 'finance',
+    location: 'Offices across Europe', note: '10-12 week case-team placements, highly competitive',
+    url: 'https://careers.bcg.com/global/en/students' },
 
   // --- NGOs & Research ---
   { id: 'cern', title: 'Summer Student & Technical Student Programmes', org: 'CERN', category: 'ngo',
@@ -136,6 +160,15 @@ const CURATED = [
   { id: 'oecd', title: 'Internship Programme', org: 'OECD', category: 'ngo',
     location: 'Paris, France', note: 'Economics & policy research, rolling intake',
     url: 'https://www.oecd.org/careers/internship-programme/' },
+  { id: 'esa', title: 'ESA Graduate Trainee Programme', org: 'European Space Agency', category: 'ngo',
+    location: 'Netherlands & ESA sites across Europe', note: '~100 places/year, one-year programme, around €2,800/month',
+    url: 'https://www.esa.int/About_Us/Careers_at_ESA/Graduates_ESA_Graduate_Trainees' },
+  { id: 'who', title: 'Internship Programme', org: 'World Health Organization', category: 'ngo',
+    location: 'Geneva, Switzerland', note: '6-24 week placements, paid living allowance',
+    url: 'https://www.who.int/careers/internship-programme' },
+  { id: 'icrc', title: 'Traineeship Programme', org: 'International Committee of the Red Cross', category: 'ngo',
+    location: 'Geneva, Switzerland', note: 'Paid traineeships across humanitarian & legal divisions, ~80 places/year',
+    url: 'https://careers.icrc.org/go/Graduates-and-Students/3808201/' },
 
   // --- Platforms & Directories (link out — not individual listings) ---
   { id: 'jobteaser', title: 'JobTeaser', org: 'Platform', category: 'platform',
@@ -161,7 +194,10 @@ const CURATED = [
     url: 'https://www.milkround.com/jobs/internship/in-europe' },
   { id: 'prosple', title: 'Prosple', org: 'Platform', category: 'platform',
     location: 'UK & Europe', note: 'Graduate job & internship search by employer',
-    url: 'https://uk.prosple.com' }
+    url: 'https://uk.prosple.com' },
+  { id: 'eures', title: 'EURES', org: 'Platform', category: 'platform',
+    location: 'Across the EU/EFTA', note: 'Official EU job & traineeship mobility portal',
+    url: 'https://eures.europa.eu' }
 ];
 
 // --- Live source: EU Careers "Highlights" (see header comment) ---
