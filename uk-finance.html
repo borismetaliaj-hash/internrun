@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UK Finance Internship Tracker — InternRun</title>
+<meta name="description" content="400+ UK finance, banking, consulting and trading internships in one searchable list — bulge bracket, boutiques, buy-side, Big 4, quant trading and more. Sourced from The Trackr.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --burgundy: #7A1F3D;
+  --burgundy-dark: #591530;
+  --burgundy-light: #A83A5C;
+  --gold: #B8863B;
+  --bg: #FBF6F2;
+  --card-bg: #FFFFFF;
+  --ink: #2B1620;
+  --ink-soft: #7A6670;
+  --border: #EFE1E6;
+  --live: #1F7A4D;
+  --live-bg: #E8F5EC;
+  --no: #A83A3A;
+  --no-bg: #FBEAEA;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--ink); }
+h1, h2, .wordmark, .pill, .card-title { font-family: 'Space Grotesk', sans-serif; }
+a { color: inherit; }
+
+.topbar {
+  position: sticky; top: 0; z-index: 20;
+  background: rgba(251,246,242,0.92); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  padding: 18px 24px 14px;
+}
+.topbar-inner { max-width: 1160px; margin: 0 auto; }
+.brand-row { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.wordmark { font-size: 24px; font-weight: 700; color: var(--ink); letter-spacing: -0.5px; text-decoration: none; }
+.wordmark span { color: var(--burgundy); }
+.back-link { font-size: 13px; font-weight: 600; color: var(--burgundy); text-decoration: none; }
+.back-link:hover { text-decoration: underline; }
+.page-title { font-size: 20px; font-weight: 700; margin: 2px 0 2px; }
+.tagline { font-size: 13px; color: var(--ink-soft); font-weight: 500; }
+.search-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+.search-input {
+  flex: 1 1 260px; padding: 11px 16px; border-radius: 12px; border: 1.5px solid var(--border);
+  background: #fff; font-family: 'Inter', sans-serif; font-size: 14px; color: var(--ink);
+}
+.search-input:focus { outline: none; border-color: var(--burgundy-light); }
+.pill-row { display: flex; gap: 8px; overflow-x: auto; padding: 12px 2px 2px; -ms-overflow-style: none; scrollbar-width: none; }
+.pill-row::-webkit-scrollbar { display: none; }
+.filter-label {
+  font-size: 10.5px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
+  color: var(--ink-soft); padding: 10px 2px 4px;
+}
+.pill {
+  flex-shrink: 0; padding: 7px 14px; border-radius: 999px; border: 1.5px solid var(--border);
+  background: #fff; font-size: 12.5px; font-weight: 600; color: var(--ink-soft); cursor: pointer;
+  transition: all .15s;
+}
+.pill:hover { border-color: var(--burgundy-light); color: var(--burgundy); }
+.pill.active { background: var(--burgundy); border-color: var(--burgundy); color: #fff; }
+.pill.active.gold { background: var(--gold); border-color: var(--gold); }
+
+.wrap { max-width: 1160px; margin: 0 auto; padding: 24px; }
+.source-note { font-size: 12px; color: var(--ink-soft); margin: 0 0 14px; }
+.source-note a { color: var(--burgundy); font-weight: 600; text-decoration: none; }
+.source-note a:hover { text-decoration: underline; }
+.result-count { font-size: 13px; color: var(--ink-soft); margin: 0 0 16px; font-weight: 500; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 12px; }
+
+.card {
+  background: var(--card-bg); border: 1px solid var(--border); border-left: 4px solid var(--burgundy);
+  border-radius: 12px; padding: 15px; display: flex; flex-direction: column; gap: 6px;
+  transition: transform .12s, box-shadow .12s;
+}
+.card:hover { transform: translateY(-2px); box-shadow: 0 10px 24px -12px rgba(122,31,61,0.25); }
+.chip-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.sector-chip {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase;
+  color: var(--burgundy); background: rgba(122,31,61,0.08); padding: 3px 9px; border-radius: 999px;
+}
+.rolling-chip {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase;
+  color: var(--gold); background: rgba(184,134,59,0.12); padding: 3px 9px; border-radius: 999px;
+}
+.visa-chip { font-size: 10px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; }
+.visa-chip.yes { color: var(--live); background: var(--live-bg); }
+.visa-chip.no { color: var(--no); background: var(--no-bg); }
+.card-org { font-size: 12px; font-weight: 600; color: var(--ink-soft); }
+.card-title { font-size: 15px; font-weight: 600; color: var(--ink); line-height: 1.3; margin: 0; }
+.card-note { font-size: 12px; color: var(--burgundy-dark); font-weight: 500; }
+.card-link {
+  margin-top: 4px; align-self: flex-start; text-decoration: none; font-size: 12.5px; font-weight: 700;
+  color: var(--burgundy); border: 1.5px solid var(--burgundy); padding: 6px 12px; border-radius: 9px;
+  transition: background .12s, color .12s;
+}
+.card-link:hover { background: var(--burgundy); color: #fff; }
+
+.empty-state { text-align: center; padding: 60px 20px; color: var(--ink-soft); }
+.empty-state .big { font-size: 34px; margin-bottom: 8px; }
+
+.footer {
+  max-width: 1160px; margin: 20px auto 40px; padding: 20px 24px 0; border-top: 1px solid var(--border);
+  font-size: 12px; color: var(--ink-soft); text-align: center;
+}
+.footer a { color: var(--burgundy); font-weight: 600; text-decoration: none; }
+.footer a:hover { text-decoration: underline; }
+
+@media (max-width: 640px) {
+  .topbar { padding: 14px 16px 10px; }
+  .wrap { padding: 16px; }
+  .grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand-row">
+      <a class="wordmark" href="/">Intern<span>Run</span></a>
+      <a class="back-link" href="/">← All internships</a>
+    </div>
+    <div class="page-title">UK Finance Internship Tracker</div>
+    <div class="tagline">400+ banking, consulting, trading & buy-side internships in one place, sourced from The Trackr.</div>
+    <div class="search-row">
+      <input class="search-input" id="searchInput" placeholder="Search by company or programme…">
+    </div>
+    <div class="filter-label">Sector</div>
+    <div class="pill-row" id="sectorRow"></div>
+    <div class="filter-label">Applications</div>
+    <div class="pill-row" id="rollingRow"></div>
+    <div class="filter-label">UK Visa Sponsorship</div>
+    <div class="pill-row" id="visaRow"></div>
+  </div>
+</div>
+
+<div class="wrap">
+  <p class="source-note">Data sourced from <a href="https://app.the-trackr.com/uk-finance/summer-internships" target="_blank" rel="noopener">The Trackr</a> · listings link out to the official application page where available, otherwise to The Trackr.</p>
+  <p class="result-count" id="resultCount"></p>
+  <div class="grid" id="grid"></div>
+  <div class="empty-state" id="emptyState" style="display:none;">
+    <div class="big">No matches</div>
+    <div>Try a different sector or search term.</div>
+  </div>
+</div>
+
+<div class="footer">InternRun · a free, no-signup directory of internships across Europe · UK finance data via <a href="https://app.the-trackr.com" target="_blank" rel="noopener">The Trackr</a></div>
+
+<script>
+const ROLLING_LABELS = { all: 'All', yes: 'Rolling / no deadline', no: 'Fixed deadline' };
+const VISA_LABELS = { all: 'All', yes: 'Sponsors visa', no: "Doesn't sponsor" };
+let ALL_ITEMS = [];
+let SECTOR_ORDER = [];
+let activeSector = 'all';
+let activeRolling = 'all';
+let activeVisa = 'all';
+
+function sectorRow() {
+  const el = document.getElementById('sectorRow');
+  el.innerHTML = '';
+  const keys = ['all', ...SECTOR_ORDER];
+  keys.forEach((key) => {
+    const btn = document.createElement('button');
+    btn.className = 'pill' + (key === activeSector ? ' active' : '');
+    btn.textContent = key === 'all' ? 'All' : key;
+    btn.onclick = () => { activeSector = key; sectorRow(); render(); };
+    el.appendChild(btn);
+  });
+}
+
+function rollingRow() {
+  const el = document.getElementById('rollingRow');
+  el.innerHTML = '';
+  Object.keys(ROLLING_LABELS).forEach((key) => {
+    const btn = document.createElement('button');
+    btn.className = 'pill' + (key === activeRolling ? ' active gold' : '');
+    btn.textContent = ROLLING_LABELS[key];
+    btn.onclick = () => { activeRolling = key; rollingRow(); render(); };
+    el.appendChild(btn);
+  });
+}
+
+function visaRow() {
+  const el = document.getElementById('visaRow');
+  el.innerHTML = '';
+  Object.keys(VISA_LABELS).forEach((key) => {
+    const btn = document.createElement('button');
+    btn.className = 'pill' + (key === activeVisa ? ' active' : '');
+    btn.textContent = VISA_LABELS[key];
+    btn.onclick = () => { activeVisa = key; visaRow(); render(); };
+    el.appendChild(btn);
+  });
+}
+
+function matchesFilters(it, q) {
+  if (activeSector !== 'all' && it.sector !== activeSector) return false;
+  if (activeRolling === 'yes' && it.rolling !== true) return false;
+  if (activeRolling === 'no' && it.rolling !== false) return false;
+  if (activeVisa === 'yes' && it.sponsorsVisa !== true) return false;
+  if (activeVisa === 'no' && it.sponsorsVisa !== false) return false;
+  if (q) {
+    const hay = (it.title + ' ' + it.org + ' ' + it.sector).toLowerCase();
+    if (!hay.includes(q.toLowerCase())) return false;
+  }
+  return true;
+}
+
+function visaChip(it) {
+  if (it.sponsorsVisa === true) return '<span class="visa-chip yes">Sponsors visa</span>';
+  if (it.sponsorsVisa === false) return '<span class="visa-chip no">No sponsorship</span>';
+  return '';
+}
+
+function render() {
+  const q = document.getElementById('searchInput').value.trim();
+  const items = ALL_ITEMS.filter((it) => matchesFilters(it, q));
+
+  document.getElementById('resultCount').textContent = items.length + (items.length === 1 ? ' listing' : ' listings');
+  const grid = document.getElementById('grid');
+  const empty = document.getElementById('emptyState');
+  grid.innerHTML = '';
+
+  if (!items.length) { empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+
+  items.forEach((it) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="chip-row">
+        <span class="sector-chip">${escapeHtml(it.sector)}</span>
+        ${it.rolling === true ? '<span class="rolling-chip">Rolling</span>' : ''}
+        ${visaChip(it)}
+      </div>
+      <div class="card-org">${escapeHtml(it.org)}</div>
+      <h3 class="card-title">${escapeHtml(it.title)}</h3>
+      ${it.note ? '<div class="card-note">' + escapeHtml(it.note) + '</div>' : ''}
+      <a class="card-link" href="${it.url}" target="_blank" rel="noopener">View →</a>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+async function init() {
+  try {
+    const res = await fetch('/api/uk-finance', { cache: 'no-store' });
+    const data = await res.json();
+    ALL_ITEMS = data.items || [];
+    SECTOR_ORDER = data.sectorOrder || [];
+  } catch (e) {
+    ALL_ITEMS = [];
+    SECTOR_ORDER = [];
+  }
+  sectorRow();
+  rollingRow();
+  visaRow();
+  render();
+  document.getElementById('searchInput').addEventListener('input', render);
+}
+init();
+</script>
+</body>
+</html>
