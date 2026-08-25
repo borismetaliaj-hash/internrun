@@ -11,6 +11,18 @@
 //     found (robots.txt allows it, no ToS restriction). Only 2-3 items at a time by design of that
 //     page — small but genuinely real-time. More live sources to follow once vetted the same way
 //     Rightmove/OnTheMarket/Alba were vetted for Roomrun.
+//
+// Filtering fields (added 2026-08-25):
+//  - countries: string[] — clean European country names, or ['Multiple countries'] for programmes
+//    that run across many offices/countries at once. Used to populate the country dropdown, so it
+//    never shows raw location prose ("17,500+ programmes", "80+ countries", etc) as a fake country.
+//  - season: ('summer'|'spring'|'other')[] — when the programme actually runs. 'summer' = the
+//    standard Jun-Sep student internship window. 'spring' = a round that starts roughly Feb-Apr
+//    (inferred from published intake/deadline months where we have them). 'other' = rolling intake,
+//    a single autumn/winter round, multi-month structured traineeships, or aggregator directories
+//    with no fixed season. Traineeships that run two rounds a year get both tags.
+//  - paid: true | false | 'mixed' — 'mixed' means the programme has both paid and unpaid tracks, or
+//    (for directories) links out to a mix of paid and unpaid postings.
 const { convert } = require('html-to-text');
 
 // Known EU institutions/agencies/bodies, copied verbatim from the "Institution/EU body" filter
@@ -75,130 +87,203 @@ const CURATED = [
   // --- EU Institutions ---
   { id: 'blue-book', title: 'EU Blue Book Traineeship', org: 'European Commission', category: 'eu',
     location: 'Brussels, Belgium', note: 'Around €1,538/month · ~1,000 places/round · deadlines 31 Jan & 31 Aug',
-    url: 'https://commission.europa.eu/about/organisation/departments-and-executive-agencies/traineeships_en' },
+    url: 'https://commission.europa.eu/about/organisation/departments-and-executive-agencies/traineeships_en',
+    countries: ['Belgium'], season: ['spring', 'other'], paid: true },
   { id: 'schuman', title: 'Schuman Traineeship', org: 'European Parliament', category: 'eu',
     location: 'Brussels, Belgium / Luxembourg', note: 'Around €1,667/month · ~500 places/round · deadlines mid-May & mid-Oct',
-    url: 'https://schuman-application.europarl.europa.eu' },
+    url: 'https://schuman-application.europarl.europa.eu',
+    countries: ['Belgium', 'Luxembourg'], season: ['spring', 'other'], paid: true },
   { id: 'cjeu', title: 'CJEU Traineeship (stage)', org: 'Court of Justice of the EU', category: 'eu',
     location: 'Luxembourg', note: 'Around €2,400/month, one of the highest-paid EU traineeships',
-    url: 'https://curia.europa.eu/jcms/jcms/Jo2_7008/en/' },
+    url: 'https://curia.europa.eu/jcms/jcms/Jo2_7008/en/',
+    countries: ['Luxembourg'], season: ['other'], paid: true },
   { id: 'ecb', title: 'Graduate & Trainee Programmes', org: 'European Central Bank', category: 'eu',
     location: 'Frankfurt, Germany', note: 'Paid traineeships across ECB departments, rolling intake',
-    url: 'https://www.ecb.europa.eu/careers/what-we-offer/graduates-trainees/html/index.en.html' },
+    url: 'https://www.ecb.europa.eu/careers/what-we-offer/graduates-trainees/html/index.en.html',
+    countries: ['Germany'], season: ['other'], paid: true },
   { id: 'eeas', title: 'Traineeships', org: 'European External Action Service', category: 'eu',
     location: 'Brussels, Belgium / EU Delegations worldwide', note: 'Paid & unpaid tracks, twice a year',
-    url: 'https://www.eeas.europa.eu/eeas/traineeships_en' },
+    url: 'https://www.eeas.europa.eu/eeas/traineeships_en',
+    countries: ['Multiple countries'], season: ['other'], paid: 'mixed' },
   { id: 'eucareers-all', title: 'All EU institutions, agencies & bodies', org: 'EU Careers (EPSO)', category: 'eu',
     location: 'Across the EU', note: 'Central directory covering 50+ EU agencies and bodies at once',
-    url: 'https://eu-careers.europa.eu/en/job-opportunities/traineeships' },
+    url: 'https://eu-careers.europa.eu/en/job-opportunities/traineeships',
+    countries: ['Multiple countries'], season: ['other'], paid: 'mixed' },
   { id: 'eib', title: 'Traineeships at the EIB', org: 'European Investment Bank', category: 'eu',
     location: 'Luxembourg', note: 'Around €1,500/month · two intakes a year, Mar-Apr & Sep-Oct',
-    url: 'https://www.eib.org/en/about/careers/categories/traineeships/index' },
+    url: 'https://www.eib.org/en/about/careers/categories/traineeships/index',
+    countries: ['Luxembourg'], season: ['spring', 'other'], paid: true },
   { id: 'frontex', title: 'Blue Book Traineeship', org: 'Frontex', category: 'eu',
     location: 'Warsaw, Poland', note: 'Paid 5-month traineeship, ~€1,476/month · up to 60 places/year',
-    url: 'https://www.frontex.europa.eu/careers/traineeships/' },
+    url: 'https://www.frontex.europa.eu/careers/traineeships/',
+    countries: ['Poland'], season: ['other'], paid: true },
 
   // --- Tech ---
   { id: 'google', title: 'Software Engineering & STEP Internships', org: 'Google', category: 'tech',
     location: 'London, Zurich, Munich, Dublin & more', note: 'Summer internships across EMEA offices',
-    url: 'https://careers.google.com/students/' },
+    url: 'https://careers.google.com/students/',
+    countries: ['Multiple countries'], season: ['summer'], paid: true },
   { id: 'microsoft', title: 'Explore & Software Engineering Internships', org: 'Microsoft', category: 'tech',
     location: 'Dublin, Munich, London & more', note: 'Undergrad (Explore) and standard SWE tracks',
-    url: 'https://careers.microsoft.com/students/us/en/usuniversityhub' },
+    url: 'https://careers.microsoft.com/students/us/en/usuniversityhub',
+    countries: ['Multiple countries'], season: ['summer'], paid: true },
   { id: 'sap', title: 'iXp Internship Programme', org: 'SAP', category: 'tech',
     location: 'Walldorf, Germany & offices EU-wide', note: 'Rolling intake, most SAP offices across Europe',
-    url: 'https://jobs.sap.com/content/Students-and-Graduates/' },
+    url: 'https://jobs.sap.com/content/Students-and-Graduates/',
+    countries: ['Multiple countries'], season: ['other'], paid: true },
   { id: 'spotify', title: 'Summer Internship', org: 'Spotify', category: 'tech',
     location: 'Stockholm, Sweden', note: 'Engineering, design & data roles, applications open ~Nov-Jan',
-    url: 'https://www.lifeatspotify.com/students' },
+    url: 'https://www.lifeatspotify.com/students',
+    countries: ['Sweden'], season: ['summer'], paid: true },
   { id: 'asml', title: 'Internship Programme', org: 'ASML', category: 'tech',
     location: 'Veldhoven, Netherlands', note: 'Deep-tech / semiconductor internships, rolling intake',
-    url: 'https://www.asml.com/en/careers/students' },
+    url: 'https://www.asml.com/en/careers/students',
+    countries: ['Netherlands'], season: ['other'], paid: true },
   { id: 'amazon', title: 'Student Internship Programme', org: 'Amazon', category: 'tech',
     location: 'London, Munich, Paris, Madrid & more', note: "Tech, ops & business tracks, open to Bachelor's/Master's/PhD students",
-    url: 'https://amazon.jobs/content/en/career-programs/university-ops/eu-students-internship' },
+    url: 'https://amazon.jobs/content/en/career-programs/university-ops/eu-students-internship',
+    countries: ['Multiple countries'], season: ['summer'], paid: true },
   { id: 'meta', title: 'Software & Production Engineering Internship', org: 'Meta', category: 'tech',
     location: 'London, Dublin', note: '12-24 week internships, multiple start dates a year',
-    url: 'https://www.metacareers.com/students-and-grads/' },
+    url: 'https://www.metacareers.com/students-and-grads/',
+    countries: ['United Kingdom', 'Ireland'], season: ['summer'], paid: true },
   { id: 'booking', title: 'Compass Internship Programme', org: 'Booking.com', category: 'tech',
     location: 'Amsterdam, Netherlands', note: '9-week or 5-6 month tracks for students at Dutch universities',
-    url: 'https://careers.booking.com/early-careers/' },
+    url: 'https://careers.booking.com/early-careers/',
+    countries: ['Netherlands'], season: ['other'], paid: true },
   { id: 'siemens', title: 'Consulting Internship (Siemens Advanta)', org: 'Siemens', category: 'tech',
     location: 'Munich, Germany & offices EU-wide', note: '10+ week placements in digital transformation consulting, rolling intake',
-    url: 'https://www.siemens-advanta.com/careers/consulting/internship' },
+    url: 'https://www.siemens-advanta.com/careers/consulting/internship',
+    countries: ['Multiple countries'], season: ['other'], paid: true },
 
   // --- Finance & Consulting ---
   { id: 'gs', title: 'Summer Analyst Programme', org: 'Goldman Sachs', category: 'finance',
     location: 'London, Frankfurt, Warsaw & more', note: 'Applications typically open ~Aug-Sep the year before',
-    url: 'https://www.goldmansachs.com/careers/students' },
+    url: 'https://www.goldmansachs.com/careers/students',
+    countries: ['Multiple countries'], season: ['summer'], paid: true },
   { id: 'mckinsey', title: 'Summer Business Analyst', org: 'McKinsey & Company', category: 'finance',
     location: 'Offices across Europe', note: 'Rolling by office, strategy/consulting track',
-    url: 'https://www.mckinsey.com/careers/students' },
+    url: 'https://www.mckinsey.com/careers/students',
+    countries: ['Multiple countries'], season: ['summer'], paid: true },
   { id: 'big4', title: 'Summer & Placement Internships', org: 'Deloitte / EY / PwC / KPMG', category: 'finance',
     location: 'Offices across Europe', note: 'Each Big Four firm runs its own European scheme — check each site',
-    url: 'https://www.pwc.com/gx/en/careers/students.html' },
+    url: 'https://www.pwc.com/gx/en/careers/students.html',
+    countries: ['Multiple countries'], season: ['summer'], paid: true },
   { id: 'unilever', title: 'Future Leaders Internship', org: 'Unilever', category: 'finance',
     location: 'London, Rotterdam & more', note: 'Marketing, finance & supply chain tracks',
-    url: 'https://www.unilever.com/careers/graduates-and-internships/' },
+    url: 'https://www.unilever.com/careers/graduates-and-internships/',
+    countries: ['Multiple countries'], season: ['summer'], paid: true },
   { id: 'jpmorgan', title: 'Summer Analyst & Software Engineer Programmes', org: 'J.P. Morgan', category: 'finance',
     location: 'London & EMEA offices', note: '10-12 week internships across markets, tech & banking',
-    url: 'https://www.jpmorganchase.com/careers/explore-opportunities/students-and-graduates' },
+    url: 'https://www.jpmorganchase.com/careers/explore-opportunities/students-and-graduates',
+    countries: ['Multiple countries'], season: ['summer'], paid: true },
   { id: 'bcg', title: 'Summer Internship', org: 'Boston Consulting Group', category: 'finance',
     location: 'Offices across Europe', note: '10-12 week case-team placements, highly competitive',
-    url: 'https://careers.bcg.com/global/en/students' },
+    url: 'https://careers.bcg.com/global/en/students',
+    countries: ['Multiple countries'], season: ['summer'], paid: true },
 
   // --- NGOs & Research ---
   { id: 'cern', title: 'Summer Student & Technical Student Programmes', org: 'CERN', category: 'ngo',
     location: 'Geneva, Switzerland (border FR/CH)', note: 'Physics, engineering & computing, deadlines ~Jan',
-    url: 'https://careers.cern/students' },
+    url: 'https://careers.cern/students',
+    countries: ['Switzerland'], season: ['summer'], paid: true },
   { id: 'undp', title: 'Internship Programme', org: 'UNDP', category: 'ngo',
-    location: 'Various EU country offices', note: 'Development & policy work, rolling by office',
-    url: 'https://www.undp.org/jobs/browse?query=intern' },
+    location: 'Various EU country offices', note: 'Development & policy work, rolling by office · paid monthly stipend',
+    url: 'https://www.undp.org/jobs/browse?query=intern',
+    countries: ['Multiple countries'], season: ['other'], paid: true },
   { id: 'unicef', title: 'Internship Programme', org: 'UNICEF', category: 'ngo',
-    location: 'Geneva & Brussels', note: 'Child rights & humanitarian work, rolling intake',
-    url: 'https://www.unicef.org/careers/internships' },
+    location: 'Geneva & Brussels', note: 'Child rights & humanitarian work, rolling intake · paid monthly stipend',
+    url: 'https://www.unicef.org/careers/internships',
+    countries: ['Switzerland', 'Belgium'], season: ['other'], paid: true },
   { id: 'oecd', title: 'Internship Programme', org: 'OECD', category: 'ngo',
-    location: 'Paris, France', note: 'Economics & policy research, rolling intake',
-    url: 'https://www.oecd.org/careers/internship-programme/' },
+    location: 'Paris, France', note: 'Economics & policy research, rolling intake · ~€1,000/month stipend',
+    url: 'https://www.oecd.org/careers/internship-programme/',
+    countries: ['France'], season: ['other'], paid: true },
   { id: 'esa', title: 'ESA Graduate Trainee Programme', org: 'European Space Agency', category: 'ngo',
     location: 'Netherlands & ESA sites across Europe', note: '~100 places/year, one-year programme, around €2,800/month',
-    url: 'https://www.esa.int/About_Us/Careers_at_ESA/Graduates_ESA_Graduate_Trainees' },
+    url: 'https://www.esa.int/About_Us/Careers_at_ESA/Graduates_ESA_Graduate_Trainees',
+    countries: ['Multiple countries'], season: ['other'], paid: true },
   { id: 'who', title: 'Internship Programme', org: 'World Health Organization', category: 'ngo',
     location: 'Geneva, Switzerland', note: '6-24 week placements, paid living allowance',
-    url: 'https://www.who.int/careers/internship-programme' },
+    url: 'https://www.who.int/careers/internship-programme',
+    countries: ['Switzerland'], season: ['other'], paid: true },
   { id: 'icrc', title: 'Traineeship Programme', org: 'International Committee of the Red Cross', category: 'ngo',
     location: 'Geneva, Switzerland', note: 'Paid traineeships across humanitarian & legal divisions, ~80 places/year',
-    url: 'https://careers.icrc.org/go/Graduates-and-Students/3808201/' },
+    url: 'https://careers.icrc.org/go/Graduates-and-Students/3808201/',
+    countries: ['Switzerland'], season: ['other'], paid: true },
 
   // --- Platforms & Directories (link out — not individual listings) ---
   { id: 'jobteaser', title: 'JobTeaser', org: 'Platform', category: 'platform',
     location: 'Pan-European', note: 'Official career platform for 800+ European universities',
-    url: 'https://www.jobteaser.com' },
+    url: 'https://www.jobteaser.com',
+    countries: ['Multiple countries'], season: ['other'], paid: 'mixed' },
   { id: 'goabroad', title: 'GoAbroad', org: 'Platform', category: 'platform',
     location: 'Global, strong EU coverage', note: '17,500+ internship & study-abroad programmes',
-    url: 'https://www.goabroad.com/intern-abroad' },
+    url: 'https://www.goabroad.com/intern-abroad',
+    countries: ['Multiple countries'], season: ['other'], paid: 'mixed' },
   { id: 'erasmusintern', title: 'ErasmusIntern', org: 'Erasmus Student Network', category: 'platform',
     location: 'Pan-European', note: 'Traineeship portal for Erasmus+ placements',
-    url: 'https://erasmusintern.org' },
+    url: 'https://erasmusintern.org',
+    countries: ['Multiple countries'], season: ['other'], paid: 'mixed' },
   { id: 'iaeste', title: 'IAESTE', org: 'Platform', category: 'platform',
     location: '80+ countries', note: 'Paid STEM placements, strong Europe network',
-    url: 'https://iaeste.org' },
+    url: 'https://iaeste.org',
+    countries: ['Multiple countries'], season: ['summer'], paid: true },
   { id: 'aiesec', title: 'AIESEC', org: 'Platform', category: 'platform',
     location: '100+ countries', note: 'Internships & volunteer exchanges, leadership focus',
-    url: 'https://aiesec.org' },
+    url: 'https://aiesec.org',
+    countries: ['Multiple countries'], season: ['other'], paid: 'mixed' },
   { id: 'piktalent', title: 'Piktalent', org: 'Platform', category: 'platform',
     location: 'Pan-European', note: 'Erasmus+ and international mobility placements',
-    url: 'https://piktalent.com' },
+    url: 'https://piktalent.com',
+    countries: ['Multiple countries'], season: ['other'], paid: 'mixed' },
   { id: 'milkround', title: 'Milkround — Europe', org: 'Platform', category: 'platform',
     location: 'UK-based, Europe-wide listings', note: 'Thousands of graduate internship listings',
-    url: 'https://www.milkround.com/jobs/internship/in-europe' },
+    url: 'https://www.milkround.com/jobs/internship/in-europe',
+    countries: ['Multiple countries'], season: ['other'], paid: 'mixed' },
   { id: 'prosple', title: 'Prosple', org: 'Platform', category: 'platform',
     location: 'UK & Europe', note: 'Graduate job & internship search by employer',
-    url: 'https://uk.prosple.com' },
+    url: 'https://uk.prosple.com',
+    countries: ['Multiple countries'], season: ['other'], paid: 'mixed' },
   { id: 'eures', title: 'EURES', org: 'Platform', category: 'platform',
     location: 'Across the EU/EFTA', note: 'Official EU job & traineeship mobility portal',
-    url: 'https://eures.europa.eu' }
+    url: 'https://eures.europa.eu',
+    countries: ['Multiple countries'], season: ['other'], paid: 'mixed' }
 ];
+
+// Clean European country names used to normalise free-text locations coming from the live
+// EU Careers scrape below. Longest-first so "Czech Republic" isn't shadowed by a shorter partial.
+const EUROPEAN_COUNTRIES = [
+  'Czech Republic', 'United Kingdom', 'Liechtenstein', 'Switzerland', 'Netherlands', 'Luxembourg',
+  'Portugal', 'Slovakia', 'Slovenia', 'Bulgaria', 'Croatia', 'Denmark', 'Estonia', 'Finland', 'Germany',
+  'Hungary', 'Iceland', 'Ireland', 'Latvia', 'Lithuania', 'Romania', 'Belgium', 'Cyprus', 'France',
+  'Greece', 'Poland', 'Sweden', 'Norway', 'Austria', 'Italy', 'Malta', 'Spain', 'Czechia'
+];
+
+function normalizeCountries(locStr) {
+  if (!locStr) return ['Multiple countries'];
+  const found = EUROPEAN_COUNTRIES.filter((c) => locStr.includes(c));
+  return found.length ? found : ['Multiple countries'];
+}
+
+// EU institution traineeship rounds are almost always twice a year. Deadlines in the back half of
+// the year (Oct-Jan) precede a round that starts roughly Feb-Apr — tag that 'spring'. Deadlines
+// Apr-Aug precede an autumn/winter start — bucketed as 'other' alongside rolling-intake postings.
+function inferSeasonFromDeadline(deadlineStr) {
+  if (!deadlineStr) return ['other'];
+  const monthNames = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+  const lower = deadlineStr.toLowerCase();
+  let month = null;
+  for (let i = 0; i < monthNames.length; i++) {
+    if (lower.includes(monthNames[i])) { month = i + 1; break; }
+  }
+  if (month === null) {
+    const m = deadlineStr.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-]\d{2,4}/);
+    if (m) month = parseInt(m[2], 10);
+  }
+  if (month && [10, 11, 12, 1].includes(month)) return ['spring'];
+  return ['other'];
+}
 
 // --- Live source: EU Careers "Highlights" (see header comment) ---
 let liveCache = { items: [], fetchedAt: 0 };
@@ -256,7 +341,10 @@ async function fetchEuCareersHighlights() {
         location: location.trim(),
         note: 'Deadline: ' + deadline.trim(),
         url: 'https://eu-careers.europa.eu/en/job-opportunities/traineeships',
-        tag: 'live'
+        tag: 'live',
+        countries: normalizeCountries(location.trim()),
+        season: inferSeasonFromDeadline(deadline.trim()),
+        paid: 'mixed'
       });
     }
     if (items.length) {
