@@ -50,6 +50,11 @@ h1, h2, .wordmark, .pill, .card-title { font-family: 'Space Grotesk', sans-serif
 }
 .pill-row { display: flex; gap: 8px; overflow-x: auto; padding: 14px 2px 2px; -ms-overflow-style: none; scrollbar-width: none; }
 .pill-row::-webkit-scrollbar { display: none; }
+.filter-group { margin-top: 2px; }
+.filter-label {
+  font-size: 10.5px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
+  color: var(--ink-soft); padding: 10px 2px 4px;
+}
 .pill {
   flex-shrink: 0; padding: 8px 16px; border-radius: 999px; border: 1.5px solid var(--border);
   background: #fff; font-size: 13px; font-weight: 600; color: var(--ink-soft); cursor: pointer;
@@ -57,6 +62,7 @@ h1, h2, .wordmark, .pill, .card-title { font-family: 'Space Grotesk', sans-serif
 }
 .pill:hover { border-color: var(--burgundy-light); color: var(--burgundy); }
 .pill.active { background: var(--burgundy); border-color: var(--burgundy); color: #fff; }
+.pill.active.gold { background: var(--gold); border-color: var(--gold); }
 
 /* --- Main --- */
 .wrap { max-width: 1080px; margin: 0 auto; padding: 24px; }
@@ -69,11 +75,23 @@ h1, h2, .wordmark, .pill, .card-title { font-family: 'Space Grotesk', sans-serif
   transition: transform .12s, box-shadow .12s;
 }
 .card:hover { transform: translateY(-2px); box-shadow: 0 10px 24px -12px rgba(122,31,61,0.25); }
-.card-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.card-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.chip-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .category-chip {
   font-size: 10.5px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase;
   color: var(--burgundy); background: rgba(122,31,61,0.08); padding: 4px 10px; border-radius: 999px;
 }
+.season-chip {
+  font-size: 10.5px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase;
+  color: var(--gold); background: rgba(184,134,59,0.12); padding: 4px 10px; border-radius: 999px;
+}
+.paid-chip {
+  font-size: 10.5px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 999px;
+}
+.paid-chip.paid { color: var(--live); background: var(--live-bg); }
+.paid-chip.unpaid { color: #8a5a1f; background: #FBEEDD; }
+.paid-chip.mixed { color: var(--ink-soft); background: #F1E9EC; }
 .live-badge {
   font-size: 10px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
   color: var(--live); background: var(--live-bg); padding: 3px 9px; border-radius: 999px;
@@ -120,7 +138,12 @@ h1, h2, .wordmark, .pill, .card-title { font-family: 'Space Grotesk', sans-serif
       <input class="search-input" id="searchInput" placeholder="Search by role, organisation, or country…">
       <select class="country-select" id="countrySelect"><option value="">All locations</option></select>
     </div>
+    <div class="filter-label">Category</div>
     <div class="pill-row" id="pillRow"></div>
+    <div class="filter-label">When</div>
+    <div class="pill-row" id="seasonRow"></div>
+    <div class="filter-label">Pay</div>
+    <div class="pill-row" id="paidRow"></div>
   </div>
 </div>
 
@@ -137,8 +160,12 @@ h1, h2, .wordmark, .pill, .card-title { font-family: 'Space Grotesk', sans-serif
 
 <script>
 const CATEGORY_LABELS = { all: 'All', eu: 'EU Institutions', tech: 'Tech', finance: 'Finance & Consulting', ngo: 'NGOs & Research', platform: 'Platforms & Directories' };
+const SEASON_LABELS = { all: 'All', summer: 'Summer internship', spring: 'Spring', other: 'Other' };
+const PAID_LABELS = { all: 'All', paid: 'Paid', unpaid: 'Unpaid' };
 let ALL_ITEMS = [];
 let activeCategory = 'all';
+let activeSeason = 'all';
+let activePaid = 'all';
 
 function pillRow() {
   const el = document.getElementById('pillRow');
@@ -152,18 +179,45 @@ function pillRow() {
   });
 }
 
+function seasonRow() {
+  const el = document.getElementById('seasonRow');
+  el.innerHTML = '';
+  Object.keys(SEASON_LABELS).forEach((key) => {
+    const btn = document.createElement('button');
+    btn.className = 'pill' + (key === activeSeason ? ' active gold' : '');
+    btn.textContent = SEASON_LABELS[key];
+    btn.onclick = () => { activeSeason = key; seasonRow(); render(); };
+    el.appendChild(btn);
+  });
+}
+
+function paidRow() {
+  const el = document.getElementById('paidRow');
+  el.innerHTML = '';
+  Object.keys(PAID_LABELS).forEach((key) => {
+    const btn = document.createElement('button');
+    btn.className = 'pill' + (key === activePaid ? ' active' : '');
+    btn.textContent = PAID_LABELS[key];
+    btn.onclick = () => { activePaid = key; paidRow(); render(); };
+    el.appendChild(btn);
+  });
+}
+
+// Countries come pre-cleaned from the API as it.countries (real European country names, or
+// 'Multiple countries' for programmes that span many offices). No more guessing a country out of
+// free-text location prose client-side.
 function populateCountries() {
   const sel = document.getElementById('countrySelect');
   const countries = new Set();
   ALL_ITEMS.forEach((it) => {
-    // crude country extraction: last comma-separated chunk, or the parenthesised bit, or the whole string
-    const loc = it.location || '';
-    const parenMatch = loc.match(/\(([^)]+)\)/);
-    if (parenMatch) { countries.add(parenMatch[1].trim()); return; }
-    const parts = loc.split(',');
-    countries.add(parts[parts.length - 1].trim());
+    (it.countries && it.countries.length ? it.countries : ['Multiple countries']).forEach((c) => countries.add(c));
   });
-  [...countries].filter(Boolean).sort().forEach((c) => {
+  const sorted = [...countries].filter(Boolean).sort((a, b) => {
+    if (a === 'Multiple countries') return 1;
+    if (b === 'Multiple countries') return -1;
+    return a.localeCompare(b);
+  });
+  sorted.forEach((c) => {
     const opt = document.createElement('option');
     opt.value = c; opt.textContent = c;
     sel.appendChild(opt);
@@ -173,12 +227,37 @@ function populateCountries() {
 
 function matchesFilters(it, q, country) {
   if (activeCategory !== 'all' && it.category !== activeCategory) return false;
-  if (country && !(it.location || '').includes(country)) return false;
+  if (country) {
+    const countries = it.countries && it.countries.length ? it.countries : ['Multiple countries'];
+    if (!countries.includes(country)) return false;
+  }
+  if (activeSeason !== 'all') {
+    const seasons = it.season && it.season.length ? it.season : ['other'];
+    if (!seasons.includes(activeSeason)) return false;
+  }
+  if (activePaid !== 'all') {
+    const paid = it.paid;
+    if (activePaid === 'paid' && !(paid === true || paid === 'mixed')) return false;
+    if (activePaid === 'unpaid' && !(paid === false || paid === 'mixed')) return false;
+  }
   if (q) {
     const hay = (it.title + ' ' + it.org + ' ' + it.location + ' ' + (it.note || '')).toLowerCase();
     if (!hay.includes(q.toLowerCase())) return false;
   }
   return true;
+}
+
+function paidChip(it) {
+  if (it.paid === true) return '<span class="paid-chip paid">Paid</span>';
+  if (it.paid === false) return '<span class="paid-chip unpaid">Unpaid</span>';
+  return '<span class="paid-chip mixed">Paid &amp; unpaid</span>';
+}
+
+function seasonChip(it) {
+  const seasons = it.season && it.season.length ? it.season : [];
+  if (!seasons.length) return '';
+  const label = seasons.includes('summer') ? 'Summer' : (seasons.includes('spring') ? 'Spring round' : 'Other timing');
+  return '<span class="season-chip">' + label + '</span>';
 }
 
 function render() {
@@ -199,7 +278,11 @@ function render() {
     card.className = 'card';
     card.innerHTML = `
       <div class="card-top">
-        <span class="category-chip">${CATEGORY_LABELS[it.category] || it.category}</span>
+        <div class="chip-row">
+          <span class="category-chip">${CATEGORY_LABELS[it.category] || it.category}</span>
+          ${seasonChip(it)}
+          ${paidChip(it)}
+        </div>
         ${it.tag === 'live' ? '<span class="live-badge"><span class="dot"></span>Live</span>' : ''}
       </div>
       <div class="card-org">${escapeHtml(it.org)}</div>
@@ -218,6 +301,8 @@ function escapeHtml(s) {
 
 async function init() {
   pillRow();
+  seasonRow();
+  paidRow();
   try {
     const res = await fetch('/api/listings', { cache: 'no-store' });
     const data = await res.json();
