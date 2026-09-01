@@ -86,6 +86,18 @@ a { color: inherit; }
 .chip.selected { background: var(--burgundy); border-color: var(--burgundy); color: #fff; }
 .pref-hint { font-size: 12px; color: var(--ink-soft); margin-top: 10px; }
 
+/* Section choice */
+.section-choice { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
+.section-card {
+  display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: 16px; border: 1.5px solid var(--border);
+  background: #fff; cursor: pointer; text-align: left; transition: border-color .12s, background .12s;
+}
+.section-card:hover { border-color: var(--burgundy); background: rgba(122,31,61,.04); }
+.section-card-emoji { font-size: 26px; flex-shrink: 0; }
+.section-card-text { display: flex; flex-direction: column; }
+.section-card-title { font-size: 15.5px; font-weight: 700; color: var(--ink); font-family: 'Space Grotesk', sans-serif; }
+.section-card-sub { font-size: 12px; color: var(--ink-soft); margin-top: 2px; }
+
 /* ---------- App shell / top bar ---------- */
 .topbar {
   position: sticky; top: 0; z-index: 30; background: rgba(247,243,241,0.94); backdrop-filter: blur(10px);
@@ -135,6 +147,16 @@ a { color: inherit; }
 .fp-apply { color: var(--burgundy); }
 .panel-backdrop { position: fixed; inset: 0; z-index: 39; display: none; }
 .panel-backdrop.show { display: block; }
+
+.settings-menu {
+  position: fixed; z-index: 40; background: #fff; border: 1px solid var(--border); border-radius: 14px;
+  box-shadow: 0 14px 34px -10px rgba(36,16,25,.28); padding: 6px; min-width: 180px; display: none;
+}
+.settings-menu.show { display: block; }
+.settings-menu-item { display: flex; align-items: center; gap: 9px; padding: 10px 12px; border-radius: 9px; font-size: 13.5px; font-weight: 600; color: var(--ink); cursor: pointer; }
+.settings-menu-item:hover { background: #F7F1F3; }
+.settings-menu-item.danger { color: var(--burgundy); }
+.settings-menu-divider { height: 1px; background: var(--border); margin: 4px 6px; }
 
 /* ---------- Feed ---------- */
 .result-bar { padding: 10px 16px 2px; font-size: 12px; color: var(--ink-soft); font-weight: 600; }
@@ -200,13 +222,35 @@ a { color: inherit; }
         <div class="onb-sub" id="accountSub">Just so we can personalise things — nothing to verify, no password needed.</div>
         <div id="nameField">
           <div class="field-label">Name</div>
-          <input class="field-input" id="nameInput" placeholder="e.g. Boris Metaliaj">
+          <input class="field-input" id="nameInput" placeholder="e.g. Jamie Fraser">
         </div>
         <div class="field-label">Email</div>
         <input class="field-input" id="emailInput" placeholder="you@st-andrews.ac.uk">
         <div class="onb-error" id="accountError">Please fill in your details to continue.</div>
         <div class="onb-actions">
           <button class="btn-primary" id="accountSubmitBtn" onclick="submitAccount()">Continue</button>
+        </div>
+      </div>
+
+      <!-- Step: section choice -->
+      <div class="onb-step" data-step="section">
+        <div class="onb-title">Which internships?</div>
+        <div class="onb-sub">You can switch between the two anytime from the top nav.</div>
+        <div class="section-choice">
+          <button class="section-card" onclick="chooseSection('europe')">
+            <span class="section-card-emoji">🇪🇺</span>
+            <span class="section-card-text">
+              <span class="section-card-title">Europe</span>
+              <span class="section-card-sub">EU institutions, tech, consulting &amp; more</span>
+            </span>
+          </button>
+          <button class="section-card" onclick="chooseSection('uk')">
+            <span class="section-card-emoji">🇬🇧</span>
+            <span class="section-card-text">
+              <span class="section-card-title">UK Finance</span>
+              <span class="section-card-sub">Banking, trading &amp; buy-side</span>
+            </span>
+          </button>
         </div>
       </div>
 
@@ -228,7 +272,7 @@ a { color: inherit; }
       <div class="topbar-row1">
         <div class="brand">Intern<span>Run</span></div>
         <div class="topbar-actions">
-          <button class="icon-btn" title="Edit preferences" onclick="openEditOverlay()">⚙</button>
+          <button class="icon-btn" id="settingsBtn" title="Settings" onclick="toggleSettingsMenu(event)">⚙</button>
         </div>
       </div>
       <div class="nav-tabs">
@@ -257,6 +301,13 @@ a { color: inherit; }
 <div class="panel-backdrop" id="panelBackdrop" onclick="closePanel()"></div>
 <div class="filter-panel" id="filterPanel"></div>
 
+<div class="panel-backdrop" id="settingsBackdrop" onclick="closeSettingsMenu()"></div>
+<div class="settings-menu" id="settingsMenu">
+  <div class="settings-menu-item" onclick="closeSettingsMenu();openEditOverlay()">Edit preferences</div>
+  <div class="settings-menu-divider"></div>
+  <div class="settings-menu-item danger" onclick="signOut()">Sign out</div>
+</div>
+
 <script>
 /* ---------------- Config ---------------- */
 const CATEGORY_OPTIONS = [
@@ -281,7 +332,7 @@ const SORT_OPTIONS = [
   { value: 'company', label: 'Company (A–Z)' },
   { value: 'role', label: 'Role (A–Z)' },
 ];
-let COUNTRY_OPTIONS = [{ value: 'all', label: 'All locations' }];
+let COUNTRY_OPTIONS = [];
 
 const AVATAR_PALETTE = ['#7A1F3D', '#B8863B', '#3D6B7A', '#4D7A3D', '#6B3D7A', '#3D4D7A'];
 
@@ -289,11 +340,11 @@ const FILTER_DEFS = [
   { key: 'category', label: 'Sector', type: 'multi', getOptions: () => CATEGORY_OPTIONS },
   { key: 'season', label: 'When', type: 'multi', getOptions: () => SEASON_OPTIONS },
   { key: 'paid', label: 'Pay', type: 'single', getOptions: () => PAY_OPTIONS },
-  { key: 'country', label: 'Location', type: 'single', getOptions: () => COUNTRY_OPTIONS },
+  { key: 'country', label: 'Location', type: 'multi', getOptions: () => COUNTRY_OPTIONS },
   { key: 'sort', label: 'Sort', type: 'single', getOptions: () => SORT_OPTIONS },
 ];
 const ONB_FILTER_KEYS = ['category', 'season', 'paid', 'country'];
-const DEFAULT_FILTERS = { category: [], season: [], paid: 'all', country: 'all', sort: 'relevance' };
+const DEFAULT_FILTERS = { category: [], season: [], paid: 'all', country: [], sort: 'relevance' };
 
 const LS_USER = 'ir_user';
 const LS_FILTERS = 'ir_filters_index';
@@ -311,7 +362,7 @@ function saveUser(u) { localStorage.setItem(LS_USER, JSON.stringify(u)); }
 function loadFilters() {
   try {
     const raw = localStorage.getItem(LS_FILTERS);
-    if (!raw) return Object.assign({}, DEFAULT_FILTERS, { category: [], season: [] });
+    if (!raw) return Object.assign({}, DEFAULT_FILTERS, { category: [], season: [], country: [] });
     const parsed = JSON.parse(raw);
     return Object.assign({}, DEFAULT_FILTERS, parsed);
   } catch (e) { return Object.assign({}, DEFAULT_FILTERS); }
@@ -363,7 +414,12 @@ function submitAccount() {
   err.style.display = 'none';
   saveUser(user);
   const hasFilters = !!localStorage.getItem(LS_FILTERS);
-  if (hasFilters) { finishOnboarding(); } else { renderPrefScreen(); goStep('filters'); }
+  if (hasFilters) { finishOnboarding(); } else { goStep('section'); }
+}
+
+function chooseSection(section) {
+  if (section === 'europe') { renderPrefScreen(); goStep('filters'); }
+  else { location.href = '/uk-finance.html'; }
 }
 
 function renderPrefScreen() {
@@ -429,6 +485,30 @@ function openEditOverlay() {
 function closeEditOverlay() {
   editingFromApp = false;
   document.getElementById('onbOverlay').style.display = 'none';
+}
+
+function toggleSettingsMenu(e) {
+  e.stopPropagation();
+  closePanel();
+  const menu = document.getElementById('settingsMenu');
+  if (menu.classList.contains('show')) { closeSettingsMenu(); return; }
+  const btn = document.getElementById('settingsBtn');
+  const rect = btn.getBoundingClientRect();
+  menu.style.top = (rect.bottom + 8) + 'px';
+  let left = rect.right - 180;
+  if (left < 12) left = 12;
+  menu.style.left = left + 'px';
+  menu.classList.add('show');
+  document.getElementById('settingsBackdrop').classList.add('show');
+}
+function closeSettingsMenu() {
+  document.getElementById('settingsMenu').classList.remove('show');
+  document.getElementById('settingsBackdrop').classList.remove('show');
+}
+function signOut() {
+  localStorage.removeItem(LS_USER);
+  closeSettingsMenu();
+  location.reload();
 }
 
 /* ---------------- Filter bar (main app) ---------------- */
@@ -523,7 +603,7 @@ function closePanel() {
   document.getElementById('panelBackdrop').classList.remove('show');
 }
 function clearAllFilters() {
-  filters = Object.assign({}, DEFAULT_FILTERS, { category: [], season: [] });
+  filters = Object.assign({}, DEFAULT_FILTERS, { category: [], season: [], country: [] });
   persistFilters();
   document.getElementById('searchInput').value = '';
   renderFilterBar();
@@ -534,14 +614,10 @@ function clearAllFilters() {
 function populateCountries() {
   const countries = new Set();
   ALL_ITEMS.forEach((it) => {
-    (it.countries && it.countries.length ? it.countries : ['Multiple countries']).forEach((c) => countries.add(c));
+    (it.countries || []).forEach((c) => { if (c) countries.add(c); });
   });
-  const sorted = [...countries].filter(Boolean).sort((a, b) => {
-    if (a === 'Multiple countries') return 1;
-    if (b === 'Multiple countries') return -1;
-    return a.localeCompare(b);
-  });
-  COUNTRY_OPTIONS = [{ value: 'all', label: 'All locations' }].concat(sorted.map((c) => ({ value: c, label: c })));
+  const sorted = [...countries].sort((a, b) => a.localeCompare(b));
+  COUNTRY_OPTIONS = sorted.map((c) => ({ value: c, label: c }));
 }
 
 function matchesFilters(it, q) {
@@ -555,9 +631,9 @@ function matchesFilters(it, q) {
     if (filters.paid === 'paid' && !(paid === true || paid === 'mixed')) return false;
     if (filters.paid === 'unpaid' && !(paid === false || paid === 'mixed')) return false;
   }
-  if (filters.country !== 'all') {
-    const countries = it.countries && it.countries.length ? it.countries : ['Multiple countries'];
-    if (!countries.includes(filters.country)) return false;
+  if (filters.country.length) {
+    const countries = it.countries || [];
+    if (!countries.some((c) => filters.country.includes(c))) return false;
   }
   if (q) {
     const hay = (it.title + ' ' + it.org + ' ' + it.location + ' ' + (it.note || '')).toLowerCase();
@@ -638,6 +714,7 @@ async function init() {
   renderFilterBar();
   document.getElementById('searchInput').addEventListener('input', render);
   window.addEventListener('resize', closePanel);
+  window.addEventListener('resize', closeSettingsMenu);
 
   const user = getUser();
   const hasFilters = !!localStorage.getItem(LS_FILTERS);
