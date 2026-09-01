@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>InternRun — Internships across Europe, in one place</title>
-<meta name="description" content="InternRun brings together internship programmes from EU institutions, major employers, and the platforms every student should know about — one searchable list, no signup required.">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#7A1F3D">
+<title>InternRun — Internships for St Andrews students</title>
+<meta name="description" content="InternRun: internship listings for University of St Andrews students. Set your filters once, then browse a clean feed of internships across Europe.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -14,201 +15,523 @@
   --burgundy-dark: #591530;
   --burgundy-light: #A83A5C;
   --gold: #B8863B;
-  --bg: #FBF6F2;
+  --bg: #F7F3F1;
   --card-bg: #FFFFFF;
-  --ink: #2B1620;
-  --ink-soft: #7A6670;
-  --border: #EFE1E6;
+  --ink: #241019;
+  --ink-soft: #8A7880;
+  --border: #EFE3E7;
   --live: #1F7A4D;
-  --live-bg: #E8F5EC;
 }
-* { box-sizing: border-box; }
-body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--ink); }
-h1, h2, .wordmark, .pill, .card-title { font-family: 'Space Grotesk', sans-serif; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; }
+body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--ink); }
+h1, h2, .brand, .job-title, .onb-title { font-family: 'Space Grotesk', sans-serif; }
+button, input, select { font-family: inherit; }
+a { color: inherit; }
 
-/* --- Header --- */
-.topbar {
-  position: sticky; top: 0; z-index: 20;
-  background: rgba(251,246,242,0.92); backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--border);
-  padding: 18px 24px 14px;
+.app-shell { max-width: 520px; margin: 0 auto; min-height: 100vh; background: var(--bg); position: relative; }
+
+/* ---------- Onboarding ---------- */
+.onb-overlay {
+  position: fixed; inset: 0; background: var(--bg); z-index: 100;
+  display: flex; flex-direction: column; overflow-y: auto;
 }
-.topbar-inner { max-width: 1080px; margin: 0 auto; }
-.brand-row { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
-.wordmark { font-size: 26px; font-weight: 700; color: var(--ink); letter-spacing: -0.5px; }
-.wordmark span { color: var(--burgundy); }
-.tagline { font-size: 13px; color: var(--ink-soft); font-weight: 500; }
-.search-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.onb-inner { max-width: 440px; margin: 0 auto; width: 100%; padding: 40px 24px 32px; flex: 1; display: flex; flex-direction: column; }
+.onb-step { display: none; flex: 1; flex-direction: column; }
+.onb-step.active { display: flex; }
+.onb-close { align-self: flex-end; background: none; border: none; font-size: 20px; color: var(--ink-soft); cursor: pointer; padding: 4px 8px; margin-bottom: 4px; display: none; }
+.onb-close.show { display: block; }
+
+/* Welcome */
+.onb-welcome { justify-content: center; text-align: center; align-items: center; }
+.onb-logo { font-size: 30px; font-weight: 700; margin-bottom: 6px; }
+.onb-logo span { color: var(--burgundy); }
+.onb-tag { font-size: 15px; color: var(--ink-soft); line-height: 1.5; margin-bottom: 36px; max-width: 320px; }
+.onb-tag b { color: var(--ink); }
+
+.btn-primary {
+  width: 100%; padding: 14px; border-radius: 14px; border: none; background: var(--burgundy); color: #fff;
+  font-size: 15px; font-weight: 700; cursor: pointer; transition: background .15s;
+}
+.btn-primary:hover { background: var(--burgundy-dark); }
+.btn-secondary {
+  width: 100%; padding: 14px; border-radius: 14px; border: 1.5px solid var(--border); background: #fff; color: var(--ink);
+  font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 10px;
+}
+
+/* Account */
+.onb-title { font-size: 22px; font-weight: 700; margin: 4px 0 4px; }
+.onb-sub { font-size: 13.5px; color: var(--ink-soft); margin-bottom: 24px; }
+.mode-tabs { display: flex; background: #F1E9EC; border-radius: 12px; padding: 3px; margin-bottom: 22px; }
+.mode-tab { flex: 1; text-align: center; padding: 9px; border-radius: 10px; font-size: 13px; font-weight: 700; color: var(--ink-soft); cursor: pointer; border: none; background: none; }
+.mode-tab.active { background: #fff; color: var(--burgundy); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+.field-label { font-size: 12.5px; font-weight: 700; color: var(--ink-soft); margin: 14px 0 6px; }
+.field-input {
+  width: 100%; padding: 12px 14px; border-radius: 12px; border: 1.5px solid var(--border);
+  font-size: 14.5px; background: #fff; color: var(--ink);
+}
+.field-input:focus { outline: none; border-color: var(--burgundy-light); }
+.onb-actions { margin-top: 28px; }
+.onb-error { color: var(--burgundy); font-size: 12.5px; margin-top: 8px; display: none; }
+
+/* Filter setup */
+.onb-scroll { flex: 1; overflow-y: auto; }
+.pref-section { margin-bottom: 24px; }
+.pref-label { font-size: 12.5px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 10px; }
+.chip-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  padding: 9px 14px; border-radius: 999px; border: 1.5px solid var(--border); background: #fff;
+  font-size: 13px; font-weight: 600; color: var(--ink); cursor: pointer; transition: all .12s;
+}
+.chip.selected { background: var(--burgundy); border-color: var(--burgundy); color: #fff; }
+.pref-hint { font-size: 12px; color: var(--ink-soft); margin-top: 10px; }
+
+/* ---------- App shell / top bar ---------- */
+.topbar {
+  position: sticky; top: 0; z-index: 30; background: rgba(247,243,241,0.94); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border); padding: 12px 16px 8px;
+}
+.topbar-row1 { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.brand { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
+.brand span { color: var(--burgundy); }
+.topbar-actions { display: flex; align-items: center; gap: 6px; }
+.icon-btn {
+  width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid var(--border); background: #fff;
+  display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; color: var(--ink-soft);
+}
+.nav-tabs { display: flex; background: #F1E9EC; border-radius: 999px; padding: 3px; margin-bottom: 10px; }
+.nav-tab { flex: 1; text-align: center; padding: 7px 6px; border-radius: 999px; font-size: 12px; font-weight: 700; color: var(--ink-soft); text-decoration: none; }
+.nav-tab.active { background: var(--burgundy); color: #fff; }
+
+.search-wrap { position: relative; margin-bottom: 10px; }
+.search-icon { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); opacity: .45; font-size: 13px; pointer-events: none; }
 .search-input {
-  flex: 1 1 260px; padding: 11px 16px; border-radius: 12px; border: 1.5px solid var(--border);
-  background: #fff; font-family: 'Inter', sans-serif; font-size: 14px; color: var(--ink);
+  width: 100%; padding: 10px 14px 10px 34px; border-radius: 12px; border: 1.5px solid var(--border);
+  font-size: 13.5px; background: #fff; color: var(--ink);
 }
 .search-input:focus { outline: none; border-color: var(--burgundy-light); }
-.country-select {
-  padding: 11px 14px; border-radius: 12px; border: 1.5px solid var(--border);
-  background: #fff; font-family: 'Inter', sans-serif; font-size: 14px; color: var(--ink); cursor: pointer;
-}
-.pill-row { display: flex; gap: 8px; overflow-x: auto; padding: 14px 2px 2px; -ms-overflow-style: none; scrollbar-width: none; }
-.pill-row::-webkit-scrollbar { display: none; }
-.filter-group { margin-top: 2px; }
-.filter-label {
-  font-size: 10.5px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
-  color: var(--ink-soft); padding: 10px 2px 4px;
-}
-.pill {
-  flex-shrink: 0; padding: 8px 16px; border-radius: 999px; border: 1.5px solid var(--border);
-  background: #fff; font-size: 13px; font-weight: 600; color: var(--ink-soft); cursor: pointer;
-  transition: all .15s;
-}
-.pill:hover { border-color: var(--burgundy-light); color: var(--burgundy); }
-.pill.active { background: var(--burgundy); border-color: var(--burgundy); color: #fff; }
-.pill.active.gold { background: var(--gold); border-color: var(--gold); }
 
-/* --- Main --- */
-.wrap { max-width: 1080px; margin: 0 auto; padding: 24px; }
-.result-count { font-size: 13px; color: var(--ink-soft); margin: 0 0 16px; font-weight: 500; }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+.filter-bar { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; -ms-overflow-style: none; scrollbar-width: none; }
+.filter-bar::-webkit-scrollbar { display: none; }
+.filter-pill {
+  flex-shrink: 0; display: flex; align-items: center; gap: 4px; padding: 7px 12px; border-radius: 999px;
+  border: 1.5px solid var(--border); background: #fff; font-size: 12px; font-weight: 700; color: var(--ink); cursor: pointer;
+}
+.filter-pill.active { border-color: var(--burgundy); color: var(--burgundy); background: rgba(122,31,61,.06); }
+.filter-pill .chev { font-size: 8px; opacity: .55; }
 
-.card {
-  background: var(--card-bg); border: 1px solid var(--border); border-left: 4px solid var(--burgundy);
-  border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 8px;
-  transition: transform .12s, box-shadow .12s;
+.filter-panel {
+  position: fixed; z-index: 40; background: #fff; border: 1px solid var(--border); border-radius: 14px;
+  box-shadow: 0 14px 34px -10px rgba(36,16,25,.28); padding: 8px; min-width: 200px; max-width: 270px;
+  max-height: 340px; overflow-y: auto; display: none;
 }
-.card:hover { transform: translateY(-2px); box-shadow: 0 10px 24px -12px rgba(122,31,61,0.25); }
-.card-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
-.chip-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.category-chip {
-  font-size: 10.5px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase;
-  color: var(--burgundy); background: rgba(122,31,61,0.08); padding: 4px 10px; border-radius: 999px;
-}
-.season-chip {
-  font-size: 10.5px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase;
-  color: var(--gold); background: rgba(184,134,59,0.12); padding: 4px 10px; border-radius: 999px;
-}
-.paid-chip {
-  font-size: 10.5px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase;
-  padding: 4px 10px; border-radius: 999px;
-}
-.paid-chip.paid { color: var(--live); background: var(--live-bg); }
-.paid-chip.unpaid { color: #8a5a1f; background: #FBEEDD; }
-.paid-chip.mixed { color: var(--ink-soft); background: #F1E9EC; }
-.live-badge {
-  font-size: 10px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
-  color: var(--live); background: var(--live-bg); padding: 3px 9px; border-radius: 999px;
-  display: inline-flex; align-items: center; gap: 4px;
-}
-.live-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--live); }
-.card-org { font-size: 12.5px; font-weight: 600; color: var(--ink-soft); }
-.card-title { font-size: 16.5px; font-weight: 600; color: var(--ink); line-height: 1.3; margin: 0; }
-.card-loc { font-size: 12.5px; color: var(--ink-soft); }
-.card-note { font-size: 12.5px; color: var(--burgundy-dark); font-weight: 500; }
-.card-link {
-  margin-top: 6px; align-self: flex-start; text-decoration: none; font-size: 13px; font-weight: 700;
-  color: var(--burgundy); border: 1.5px solid var(--burgundy); padding: 7px 14px; border-radius: 10px;
-  transition: background .12s, color .12s;
-}
-.card-link:hover { background: var(--burgundy); color: #fff; }
+.filter-panel.show { display: block; }
+.filter-option { display: flex; align-items: center; gap: 9px; padding: 9px 8px; border-radius: 9px; font-size: 13px; cursor: pointer; }
+.filter-option:hover { background: #F7F1F3; }
+.filter-option input { accent-color: var(--burgundy); width: 15px; height: 15px; flex-shrink: 0; }
+.filter-panel-actions { display: flex; justify-content: space-between; margin-top: 4px; padding: 8px 6px 2px; border-top: 1px solid var(--border); }
+.filter-panel-actions button { font-size: 12px; font-weight: 700; border: none; background: none; cursor: pointer; padding: 4px; }
+.fp-clear { color: var(--ink-soft); }
+.fp-apply { color: var(--burgundy); }
+.panel-backdrop { position: fixed; inset: 0; z-index: 39; display: none; }
+.panel-backdrop.show { display: block; }
 
-.empty-state { text-align: center; padding: 60px 20px; color: var(--ink-soft); }
-.empty-state .big { font-size: 34px; margin-bottom: 8px; }
+/* ---------- Feed ---------- */
+.result-bar { padding: 10px 16px 2px; font-size: 12px; color: var(--ink-soft); font-weight: 600; }
+.feed { padding: 8px 16px 40px; display: flex; flex-direction: column; gap: 10px; }
 
-.footer {
-  max-width: 1080px; margin: 20px auto 40px; padding: 20px 24px 0; border-top: 1px solid var(--border);
-  font-size: 12px; color: var(--ink-soft); text-align: center;
+.job-card {
+  display: block; background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px;
+  padding: 13px 13px 12px; text-decoration: none; color: inherit; transition: box-shadow .15s, transform .12s;
 }
+.job-card:hover { box-shadow: 0 10px 24px -12px rgba(36,16,25,.22); transform: translateY(-1px); }
+.job-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.job-card-head { display: flex; gap: 10px; align-items: flex-start; min-width: 0; }
+.avatar {
+  width: 36px; height: 36px; border-radius: 10px; color: #fff; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 14px; flex-shrink: 0; font-family: 'Space Grotesk', sans-serif;
+}
+.job-info { min-width: 0; }
+.job-company { font-size: 11px; color: var(--ink-soft); font-weight: 700; text-transform: uppercase; letter-spacing: .3px; display: flex; align-items: center; gap: 5px; }
+.live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--live); flex-shrink: 0; }
+.job-title { font-size: 15.5px; font-weight: 700; color: var(--ink); line-height: 1.32; margin-top: 3px; }
+.save-btn {
+  flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  background: none; border: none; color: #D8C7CE; cursor: pointer; font-size: 18px; line-height: 1;
+}
+.save-btn.saved { color: var(--gold); }
+.job-meta { margin-top: 10px; font-size: 12px; color: var(--ink-soft); display: flex; flex-wrap: wrap; align-items: center; }
+.job-meta span:not(:last-child)::after { content: '·'; margin: 0 6px; color: var(--border); }
 
-@media (max-width: 640px) {
-  .topbar { padding: 14px 16px 10px; }
-  .wrap { padding: 16px; }
-  .grid { grid-template-columns: 1fr; }
+.empty-state { text-align: center; padding: 70px 24px; color: var(--ink-soft); }
+.empty-state .big { font-size: 32px; margin-bottom: 8px; }
+.empty-state .reset-link { display: inline-block; margin-top: 12px; color: var(--burgundy); font-weight: 700; font-size: 13px; cursor: pointer; }
+
+.footer { padding: 16px 24px 32px; font-size: 11.5px; color: var(--ink-soft); text-align: center; }
+
+@media (max-width: 380px) {
+  .filter-pill { font-size: 11.5px; padding: 6px 10px; }
 }
 </style>
 </head>
 <body>
 
-<div class="topbar">
-  <div class="topbar-inner">
-    <div class="brand-row">
-      <div>
-        <div class="wordmark">Intern<span>Run</span></div>
-        <div class="tagline">Internships across Europe — EU institutions, employers, and platforms, in one place.</div>
+<div class="app-shell">
+
+  <!-- ===== Onboarding overlay ===== -->
+  <div class="onb-overlay" id="onbOverlay">
+    <div class="onb-inner">
+      <button class="onb-close" id="onbCloseBtn" onclick="closeEditOverlay()">✕</button>
+
+      <!-- Step: welcome -->
+      <div class="onb-step onb-welcome" data-step="welcome">
+        <div class="onb-logo">Intern<span>Run</span></div>
+        <div class="onb-tag">Internship listings built for <b>University of St Andrews</b> students. Set your filters once, then swipe through a clean feed — no clutter.</div>
+        <button class="btn-primary" onclick="goStep('account')">Get started</button>
       </div>
-      <a href="/uk-finance.html" style="font-size:13px;font-weight:700;color:#fff;background:var(--burgundy);padding:9px 16px;border-radius:10px;text-decoration:none;white-space:nowrap;">UK Finance Tracker →</a>
+
+      <!-- Step: account -->
+      <div class="onb-step" data-step="account">
+        <div class="mode-tabs">
+          <button class="mode-tab active" id="tabCreate" onclick="setAuthMode('create')">Create account</button>
+          <button class="mode-tab" id="tabSignin" onclick="setAuthMode('signin')">Sign in</button>
+        </div>
+        <div class="onb-title" id="accountTitle">Create your account</div>
+        <div class="onb-sub" id="accountSub">Just so we can personalise things — nothing to verify, no password needed.</div>
+        <div id="nameField">
+          <div class="field-label">Name</div>
+          <input class="field-input" id="nameInput" placeholder="e.g. Boris Metaliaj">
+        </div>
+        <div class="field-label">Email</div>
+        <input class="field-input" id="emailInput" placeholder="you@st-andrews.ac.uk">
+        <div class="onb-error" id="accountError">Please fill in your details to continue.</div>
+        <div class="onb-actions">
+          <button class="btn-primary" id="accountSubmitBtn" onclick="submitAccount()">Continue</button>
+        </div>
+      </div>
+
+      <!-- Step: filter setup -->
+      <div class="onb-step" data-step="filters">
+        <div class="onb-title">Set your preferences</div>
+        <div class="onb-sub">You can change these anytime from the feed.</div>
+        <div class="onb-scroll" id="prefScroll"></div>
+        <div class="onb-actions">
+          <button class="btn-primary" id="filtersSubmitBtn" onclick="submitFilters()">See internships</button>
+        </div>
+      </div>
     </div>
-    <div class="search-row">
-      <input class="search-input" id="searchInput" placeholder="Search by role, organisation, or country…">
-      <select class="country-select" id="countrySelect"><option value="">All locations</option></select>
-    </div>
-    <div class="filter-label">Category</div>
-    <div class="pill-row" id="pillRow"></div>
-    <div class="filter-label">When</div>
-    <div class="pill-row" id="seasonRow"></div>
-    <div class="filter-label">Pay</div>
-    <div class="pill-row" id="paidRow"></div>
   </div>
+
+  <!-- ===== Main app ===== -->
+  <div id="mainApp" style="display:none;">
+    <div class="topbar">
+      <div class="topbar-row1">
+        <div class="brand">Intern<span>Run</span></div>
+        <div class="topbar-actions">
+          <button class="icon-btn" title="Edit preferences" onclick="openEditOverlay()">⚙</button>
+        </div>
+      </div>
+      <div class="nav-tabs">
+        <a class="nav-tab active" href="/">Europe</a>
+        <a class="nav-tab" href="/uk-finance.html">UK Finance</a>
+      </div>
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input class="search-input" id="searchInput" placeholder="Search by role, organisation, or country…">
+      </div>
+      <div class="filter-bar" id="filterBar"></div>
+    </div>
+
+    <p class="result-bar" id="resultCount"></p>
+    <div class="feed" id="feed"></div>
+    <div class="empty-state" id="emptyState" style="display:none;">
+      <div class="big">No matches</div>
+      <div>Try adjusting your filters or search term.</div>
+      <div class="reset-link" onclick="clearAllFilters()">Clear all filters</div>
+    </div>
+    <div class="footer">InternRun · a free, no-signup-required directory of internships across Europe · listings link out to the official source</div>
+  </div>
+
 </div>
 
-<div class="wrap">
-  <p class="result-count" id="resultCount"></p>
-  <div class="grid" id="grid"></div>
-  <div class="empty-state" id="emptyState" style="display:none;">
-    <div class="big">No matches</div>
-    <div>Try a different category, country, or search term.</div>
-  </div>
-</div>
-
-<div class="footer">InternRun · a free, no-signup directory of internships across Europe · listings link out to the official source</div>
+<div class="panel-backdrop" id="panelBackdrop" onclick="closePanel()"></div>
+<div class="filter-panel" id="filterPanel"></div>
 
 <script>
-const CATEGORY_LABELS = { all: 'All', eu: 'EU Institutions', tech: 'Tech', finance: 'Finance & Consulting', ngo: 'NGOs & Research', platform: 'Platforms & Directories' };
-const SEASON_LABELS = { all: 'All', summer: 'Summer internship', spring: 'Spring', other: 'Other' };
-const PAID_LABELS = { all: 'All', paid: 'Paid', unpaid: 'Unpaid' };
+/* ---------------- Config ---------------- */
+const CATEGORY_OPTIONS = [
+  { value: 'eu', label: 'EU Institutions' },
+  { value: 'tech', label: 'Tech' },
+  { value: 'finance', label: 'Finance & Consulting' },
+  { value: 'ngo', label: 'NGOs & Research' },
+  { value: 'platform', label: 'Platforms & Directories' },
+];
+const SEASON_OPTIONS = [
+  { value: 'summer', label: 'Summer' },
+  { value: 'spring', label: 'Spring' },
+  { value: 'other', label: 'Other timing' },
+];
+const PAY_OPTIONS = [
+  { value: 'all', label: 'Either' },
+  { value: 'paid', label: 'Paid' },
+  { value: 'unpaid', label: 'Unpaid' },
+];
+const SORT_OPTIONS = [
+  { value: 'relevance', label: 'Relevance' },
+  { value: 'company', label: 'Company (A–Z)' },
+  { value: 'role', label: 'Role (A–Z)' },
+];
+let COUNTRY_OPTIONS = [{ value: 'all', label: 'All locations' }];
+
+const AVATAR_PALETTE = ['#7A1F3D', '#B8863B', '#3D6B7A', '#4D7A3D', '#6B3D7A', '#3D4D7A'];
+
+const FILTER_DEFS = [
+  { key: 'category', label: 'Sector', type: 'multi', getOptions: () => CATEGORY_OPTIONS },
+  { key: 'season', label: 'When', type: 'multi', getOptions: () => SEASON_OPTIONS },
+  { key: 'paid', label: 'Pay', type: 'single', getOptions: () => PAY_OPTIONS },
+  { key: 'country', label: 'Location', type: 'single', getOptions: () => COUNTRY_OPTIONS },
+  { key: 'sort', label: 'Sort', type: 'single', getOptions: () => SORT_OPTIONS },
+];
+const ONB_FILTER_KEYS = ['category', 'season', 'paid', 'country'];
+const DEFAULT_FILTERS = { category: [], season: [], paid: 'all', country: 'all', sort: 'relevance' };
+
+const LS_USER = 'ir_user';
+const LS_FILTERS = 'ir_filters_index';
+const LS_SAVED = 'ir_saved_index';
+
 let ALL_ITEMS = [];
-let activeCategory = 'all';
-let activeSeason = 'all';
-let activePaid = 'all';
+let filters = loadFilters();
+let authMode = 'create';
+let editingFromApp = false;
+let openPanelKey = null;
 
-function pillRow() {
-  const el = document.getElementById('pillRow');
+/* ---------------- Storage helpers ---------------- */
+function getUser() { try { return JSON.parse(localStorage.getItem(LS_USER)); } catch (e) { return null; } }
+function saveUser(u) { localStorage.setItem(LS_USER, JSON.stringify(u)); }
+function loadFilters() {
+  try {
+    const raw = localStorage.getItem(LS_FILTERS);
+    if (!raw) return Object.assign({}, DEFAULT_FILTERS, { category: [], season: [] });
+    const parsed = JSON.parse(raw);
+    return Object.assign({}, DEFAULT_FILTERS, parsed);
+  } catch (e) { return Object.assign({}, DEFAULT_FILTERS); }
+}
+function persistFilters() { localStorage.setItem(LS_FILTERS, JSON.stringify(filters)); }
+function getSaved() { try { return JSON.parse(localStorage.getItem(LS_SAVED)) || []; } catch (e) { return []; } }
+function isSaved(id) { return getSaved().includes(id); }
+function toggleSave(btn) {
+  const id = btn.getAttribute('data-save');
+  let saved = getSaved();
+  if (saved.includes(id)) { saved = saved.filter((x) => x !== id); btn.classList.remove('saved'); btn.textContent = '☆'; }
+  else { saved.push(id); btn.classList.add('saved'); btn.textContent = '★'; }
+  localStorage.setItem(LS_SAVED, JSON.stringify(saved));
+}
+
+/* ---------------- Onboarding flow ---------------- */
+function goStep(step) {
+  document.querySelectorAll('.onb-step').forEach((el) => el.classList.remove('active'));
+  document.querySelector('.onb-step[data-step="' + step + '"]').classList.add('active');
+}
+
+function setAuthMode(mode) {
+  authMode = mode;
+  document.getElementById('tabCreate').classList.toggle('active', mode === 'create');
+  document.getElementById('tabSignin').classList.toggle('active', mode === 'signin');
+  document.getElementById('nameField').style.display = mode === 'create' ? 'block' : 'none';
+  document.getElementById('accountTitle').textContent = mode === 'create' ? 'Create your account' : 'Welcome back';
+  document.getElementById('accountSub').textContent = mode === 'create'
+    ? 'Just so we can personalise things — nothing to verify, no password needed.'
+    : 'Enter the email you used before.';
+  document.getElementById('accountSubmitBtn').textContent = mode === 'create' ? 'Continue' : 'Sign in';
+  document.getElementById('accountError').style.display = 'none';
+}
+
+function submitAccount() {
+  const email = document.getElementById('emailInput').value.trim();
+  const nameInput = document.getElementById('nameInput').value.trim();
+  const err = document.getElementById('accountError');
+  if (!email) { err.style.display = 'block'; return; }
+  let user;
+  if (authMode === 'signin') {
+    const existing = getUser();
+    const name = (existing && existing.email === email) ? existing.name : email.split('@')[0];
+    user = { name: name, email: email };
+  } else {
+    if (!nameInput) { err.style.display = 'block'; return; }
+    user = { name: nameInput, email: email };
+  }
+  err.style.display = 'none';
+  saveUser(user);
+  const hasFilters = !!localStorage.getItem(LS_FILTERS);
+  if (hasFilters) { finishOnboarding(); } else { renderPrefScreen(); goStep('filters'); }
+}
+
+function renderPrefScreen() {
+  const el = document.getElementById('prefScroll');
   el.innerHTML = '';
-  Object.keys(CATEGORY_LABELS).forEach((key) => {
+  ONB_FILTER_KEYS.forEach((key) => {
+    const def = FILTER_DEFS.find((d) => d.key === key);
+    const options = def.getOptions();
+    const section = document.createElement('div');
+    section.className = 'pref-section';
+    const label = document.createElement('div');
+    label.className = 'pref-label';
+    label.textContent = def.label + (def.type === 'multi' ? ' (pick any)' : '');
+    section.appendChild(label);
+    const grid = document.createElement('div');
+    grid.className = 'chip-grid';
+    options.forEach((opt) => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'chip';
+      chip.textContent = opt.label;
+      const isSelected = def.type === 'multi' ? filters[key].includes(opt.value) : filters[key] === opt.value;
+      if (isSelected) chip.classList.add('selected');
+      chip.onclick = () => {
+        if (def.type === 'multi') {
+          const idx = filters[key].indexOf(opt.value);
+          if (idx >= 0) filters[key].splice(idx, 1); else filters[key].push(opt.value);
+        } else {
+          filters[key] = opt.value;
+        }
+        renderPrefScreen();
+      };
+      grid.appendChild(chip);
+    });
+    section.appendChild(grid);
+    el.appendChild(section);
+  });
+  const hint = document.createElement('div');
+  hint.className = 'pref-hint';
+  hint.textContent = 'Leave a section empty to see everything in that category.';
+  el.appendChild(hint);
+}
+
+function submitFilters() {
+  persistFilters();
+  if (editingFromApp) { closeEditOverlay(); render(); return; }
+  finishOnboarding();
+}
+
+function finishOnboarding() {
+  document.getElementById('onbOverlay').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'block';
+}
+
+function openEditOverlay() {
+  editingFromApp = true;
+  document.getElementById('onbOverlay').style.display = 'flex';
+  document.getElementById('onbCloseBtn').classList.add('show');
+  document.getElementById('filtersSubmitBtn').textContent = 'Save';
+  renderPrefScreen();
+  goStep('filters');
+}
+function closeEditOverlay() {
+  editingFromApp = false;
+  document.getElementById('onbOverlay').style.display = 'none';
+}
+
+/* ---------------- Filter bar (main app) ---------------- */
+function filterSummary(def) {
+  if (def.key === 'sort') { const o = SORT_OPTIONS.find((x) => x.value === filters.sort); return o ? o.label : 'Sort'; }
+  if (def.type === 'multi') {
+    const n = filters[def.key].length;
+    return n ? def.label + ' (' + n + ')' : def.label;
+  }
+  if (filters[def.key] === 'all') return def.label;
+  const opts = def.getOptions();
+  const o = opts.find((x) => x.value === filters[def.key]);
+  return o ? o.label : def.label;
+}
+
+function renderFilterBar() {
+  const bar = document.getElementById('filterBar');
+  bar.innerHTML = '';
+  FILTER_DEFS.forEach((def) => {
     const btn = document.createElement('button');
-    btn.className = 'pill' + (key === activeCategory ? ' active' : '');
-    btn.textContent = CATEGORY_LABELS[key];
-    btn.onclick = () => { activeCategory = key; pillRow(); render(); };
-    el.appendChild(btn);
+    btn.className = 'filter-pill';
+    const active = def.type === 'multi' ? filters[def.key].length > 0 : (def.key !== 'sort' && filters[def.key] !== 'all');
+    if (active) btn.classList.add('active');
+    btn.innerHTML = '<span>' + escapeHtml(filterSummary(def)) + '</span><span class="chev">▾</span>';
+    btn.onclick = (e) => openPanel(def, btn);
+    bar.appendChild(btn);
   });
 }
 
-function seasonRow() {
-  const el = document.getElementById('seasonRow');
-  el.innerHTML = '';
-  Object.keys(SEASON_LABELS).forEach((key) => {
-    const btn = document.createElement('button');
-    btn.className = 'pill' + (key === activeSeason ? ' active gold' : '');
-    btn.textContent = SEASON_LABELS[key];
-    btn.onclick = () => { activeSeason = key; seasonRow(); render(); };
-    el.appendChild(btn);
+function openPanel(def, buttonEl) {
+  if (openPanelKey === def.key) { closePanel(); return; }
+  openPanelKey = def.key;
+  const panel = document.getElementById('filterPanel');
+  panel.innerHTML = '';
+  const options = def.getOptions();
+  options.forEach((opt) => {
+    const row = document.createElement('label');
+    row.className = 'filter-option';
+    const input = document.createElement('input');
+    input.type = def.type === 'multi' ? 'checkbox' : 'radio';
+    input.name = 'panel-' + def.key;
+    if (def.type === 'multi') { input.checked = filters[def.key].includes(opt.value); }
+    else { input.checked = filters[def.key] === opt.value; }
+    input.onchange = () => {
+      if (def.type === 'multi') {
+        const idx = filters[def.key].indexOf(opt.value);
+        if (input.checked && idx < 0) filters[def.key].push(opt.value);
+        if (!input.checked && idx >= 0) filters[def.key].splice(idx, 1);
+      } else {
+        filters[def.key] = opt.value;
+      }
+      persistFilters();
+      renderFilterBar();
+      render();
+      if (def.type === 'single') closePanel();
+    };
+    row.appendChild(input);
+    const span = document.createElement('span');
+    span.textContent = opt.label;
+    row.appendChild(span);
+    panel.appendChild(row);
   });
+  const actions = document.createElement('div');
+  actions.className = 'filter-panel-actions';
+  const clearBtn = document.createElement('button');
+  clearBtn.className = 'fp-clear';
+  clearBtn.textContent = 'Clear';
+  clearBtn.onclick = () => {
+    filters[def.key] = def.type === 'multi' ? [] : (def.key === 'sort' ? 'relevance' : 'all');
+    persistFilters(); renderFilterBar(); render(); closePanel();
+  };
+  const doneBtn = document.createElement('button');
+  doneBtn.className = 'fp-apply';
+  doneBtn.textContent = 'Done';
+  doneBtn.onclick = closePanel;
+  actions.appendChild(clearBtn);
+  actions.appendChild(doneBtn);
+  panel.appendChild(actions);
+
+  const rect = buttonEl.getBoundingClientRect();
+  panel.style.top = (rect.bottom + 8) + 'px';
+  let left = rect.left;
+  const maxLeft = window.innerWidth - 270 - 12;
+  if (left > maxLeft) left = Math.max(12, maxLeft);
+  panel.style.left = left + 'px';
+  panel.classList.add('show');
+  document.getElementById('panelBackdrop').classList.add('show');
+}
+function closePanel() {
+  openPanelKey = null;
+  document.getElementById('filterPanel').classList.remove('show');
+  document.getElementById('panelBackdrop').classList.remove('show');
+}
+function clearAllFilters() {
+  filters = Object.assign({}, DEFAULT_FILTERS, { category: [], season: [] });
+  persistFilters();
+  document.getElementById('searchInput').value = '';
+  renderFilterBar();
+  render();
 }
 
-function paidRow() {
-  const el = document.getElementById('paidRow');
-  el.innerHTML = '';
-  Object.keys(PAID_LABELS).forEach((key) => {
-    const btn = document.createElement('button');
-    btn.className = 'pill' + (key === activePaid ? ' active' : '');
-    btn.textContent = PAID_LABELS[key];
-    btn.onclick = () => { activePaid = key; paidRow(); render(); };
-    el.appendChild(btn);
-  });
-}
-
-// Countries come pre-cleaned from the API as it.countries (real European country names, or
-// 'Multiple countries' for programmes that span many offices). No more guessing a country out of
-// free-text location prose client-side.
+/* ---------------- Data + rendering ---------------- */
 function populateCountries() {
-  const sel = document.getElementById('countrySelect');
   const countries = new Set();
   ALL_ITEMS.forEach((it) => {
     (it.countries && it.countries.length ? it.countries : ['Multiple countries']).forEach((c) => countries.add(c));
@@ -218,102 +541,115 @@ function populateCountries() {
     if (b === 'Multiple countries') return -1;
     return a.localeCompare(b);
   });
-  sorted.forEach((c) => {
-    const opt = document.createElement('option');
-    opt.value = c; opt.textContent = c;
-    sel.appendChild(opt);
-  });
-  sel.onchange = render;
+  COUNTRY_OPTIONS = [{ value: 'all', label: 'All locations' }].concat(sorted.map((c) => ({ value: c, label: c })));
 }
 
-function matchesFilters(it, q, country) {
-  if (activeCategory !== 'all' && it.category !== activeCategory) return false;
-  if (country) {
-    const countries = it.countries && it.countries.length ? it.countries : ['Multiple countries'];
-    if (!countries.includes(country)) return false;
-  }
-  if (activeSeason !== 'all') {
+function matchesFilters(it, q) {
+  if (filters.category.length && !filters.category.includes(it.category)) return false;
+  if (filters.season.length) {
     const seasons = it.season && it.season.length ? it.season : ['other'];
-    if (!seasons.includes(activeSeason)) return false;
+    if (!seasons.some((s) => filters.season.includes(s))) return false;
   }
-  if (activePaid !== 'all') {
+  if (filters.paid !== 'all') {
     const paid = it.paid;
-    if (activePaid === 'paid' && !(paid === true || paid === 'mixed')) return false;
-    if (activePaid === 'unpaid' && !(paid === false || paid === 'mixed')) return false;
+    if (filters.paid === 'paid' && !(paid === true || paid === 'mixed')) return false;
+    if (filters.paid === 'unpaid' && !(paid === false || paid === 'mixed')) return false;
+  }
+  if (filters.country !== 'all') {
+    const countries = it.countries && it.countries.length ? it.countries : ['Multiple countries'];
+    if (!countries.includes(filters.country)) return false;
   }
   if (q) {
     const hay = (it.title + ' ' + it.org + ' ' + it.location + ' ' + (it.note || '')).toLowerCase();
-    if (!hay.includes(q.toLowerCase())) return false;
+    if (!hay.includes(q)) return false;
   }
   return true;
 }
 
-function paidChip(it) {
-  if (it.paid === true) return '<span class="paid-chip paid">Paid</span>';
-  if (it.paid === false) return '<span class="paid-chip unpaid">Unpaid</span>';
-  return '<span class="paid-chip mixed">Paid &amp; unpaid</span>';
+function sortItems(items) {
+  const arr = items.slice();
+  if (filters.sort === 'company') arr.sort((a, b) => (a.org || '').localeCompare(b.org || ''));
+  else if (filters.sort === 'role') arr.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+  return arr;
 }
 
-function seasonChip(it) {
+function avatarColor(name) {
+  let hash = 0;
+  for (let i = 0; i < (name || '').length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+  return AVATAR_PALETTE[hash % AVATAR_PALETTE.length];
+}
+
+function cardHtml(it) {
+  const id = it.url;
+  const initial = (it.org || '?').trim().charAt(0).toUpperCase() || '?';
+  const payLabel = it.paid === true ? 'Paid' : it.paid === false ? 'Unpaid' : 'Paid & unpaid';
   const seasons = it.season && it.season.length ? it.season : [];
-  if (!seasons.length) return '';
-  const label = seasons.includes('summer') ? 'Summer' : (seasons.includes('spring') ? 'Spring round' : 'Other timing');
-  return '<span class="season-chip">' + label + '</span>';
+  const whenLabel = seasons.includes('summer') ? 'Summer' : seasons.includes('spring') ? 'Spring' : (seasons.length ? 'Other timing' : '');
+  const saved = isSaved(id);
+  return '' +
+    '<a class="job-card" href="' + it.url + '" target="_blank" rel="noopener">' +
+      '<div class="job-card-top">' +
+        '<div class="job-card-head">' +
+          '<div class="avatar" style="background:' + avatarColor(it.org || '') + '">' + escapeHtml(initial) + '</div>' +
+          '<div class="job-info">' +
+            '<div class="job-company">' + (it.tag === 'live' ? '<span class="live-dot"></span>' : '') + escapeHtml(it.org) + '</div>' +
+            '<div class="job-title">' + escapeHtml(it.title) + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<button class="save-btn' + (saved ? ' saved' : '') + '" data-save="' + escapeHtml(id) + '" onclick="event.preventDefault();event.stopPropagation();toggleSave(this)">' + (saved ? '★' : '☆') + '</button>' +
+      '</div>' +
+      '<div class="job-meta">' +
+        '<span>' + payLabel + '</span>' +
+        (it.location ? '<span>' + escapeHtml(it.location) + '</span>' : '') +
+        (whenLabel ? '<span>' + whenLabel + '</span>' : '') +
+      '</div>' +
+    '</a>';
 }
 
 function render() {
-  const q = document.getElementById('searchInput').value.trim();
-  const country = document.getElementById('countrySelect').value;
-  const items = ALL_ITEMS.filter((it) => matchesFilters(it, q, country));
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  let items = ALL_ITEMS.filter((it) => matchesFilters(it, q));
+  items = sortItems(items);
 
   document.getElementById('resultCount').textContent = items.length + (items.length === 1 ? ' listing' : ' listings');
-  const grid = document.getElementById('grid');
+  const feed = document.getElementById('feed');
   const empty = document.getElementById('emptyState');
-  grid.innerHTML = '';
-
-  if (!items.length) { empty.style.display = 'block'; return; }
+  if (!items.length) { feed.innerHTML = ''; empty.style.display = 'block'; return; }
   empty.style.display = 'none';
-
-  items.forEach((it) => {
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.innerHTML = `
-      <div class="card-top">
-        <div class="chip-row">
-          <span class="category-chip">${CATEGORY_LABELS[it.category] || it.category}</span>
-          ${seasonChip(it)}
-          ${paidChip(it)}
-        </div>
-        ${it.tag === 'live' ? '<span class="live-badge"><span class="dot"></span>Live</span>' : ''}
-      </div>
-      <div class="card-org">${escapeHtml(it.org)}</div>
-      <h3 class="card-title">${escapeHtml(it.title)}</h3>
-      <div class="card-loc">${escapeHtml(it.location)}</div>
-      ${it.note ? '<div class="card-note">' + escapeHtml(it.note) + '</div>' : ''}
-      <a class="card-link" href="${it.url}" target="_blank" rel="noopener">View →</a>
-    `;
-    grid.appendChild(card);
-  });
+  feed.innerHTML = items.map(cardHtml).join('');
 }
 
 function escapeHtml(s) {
   return String(s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
-async function init() {
-  pillRow();
-  seasonRow();
-  paidRow();
+/* ---------------- Init ---------------- */
+async function loadData() {
   try {
     const res = await fetch('/api/listings', { cache: 'no-store' });
     const data = await res.json();
     ALL_ITEMS = data.items || [];
-  } catch (e) {
-    ALL_ITEMS = [];
-  }
+  } catch (e) { ALL_ITEMS = []; }
   populateCountries();
-  render();
+}
+
+async function init() {
+  await loadData();
+  renderFilterBar();
   document.getElementById('searchInput').addEventListener('input', render);
+  window.addEventListener('resize', closePanel);
+
+  const user = getUser();
+  const hasFilters = !!localStorage.getItem(LS_FILTERS);
+  if (!user) {
+    goStep('welcome');
+  } else if (!hasFilters) {
+    renderPrefScreen();
+    goStep('filters');
+  } else {
+    finishOnboarding();
+  }
+  render();
 }
 init();
 </script>
