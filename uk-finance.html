@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#7A1F3D">
 <title>UK Finance Internship Tracker — InternRun</title>
-<meta name="description" content="InternRun UK Finance Tracker: 400+ banking, consulting, trading and buy-side internships for University of St Andrews students, sourced from The Trackr.">
+<meta name="description" content="InternRun UK Finance Tracker: 400+ banking, consulting, trading and buy-side internships for University of St Andrews students.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -79,6 +79,18 @@ a { color: inherit; }
 .chip.selected { background: var(--burgundy); border-color: var(--burgundy); color: #fff; }
 .pref-hint { font-size: 12px; color: var(--ink-soft); margin-top: 10px; }
 
+/* Section choice */
+.section-choice { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
+.section-card {
+  display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: 16px; border: 1.5px solid var(--border);
+  background: #fff; cursor: pointer; text-align: left; transition: border-color .12s, background .12s;
+}
+.section-card:hover { border-color: var(--burgundy); background: rgba(122,31,61,.04); }
+.section-card-emoji { font-size: 26px; flex-shrink: 0; }
+.section-card-text { display: flex; flex-direction: column; }
+.section-card-title { font-size: 15.5px; font-weight: 700; color: var(--ink); font-family: 'Space Grotesk', sans-serif; }
+.section-card-sub { font-size: 12px; color: var(--ink-soft); margin-top: 2px; }
+
 /* ---------- App shell / top bar ---------- */
 .topbar {
   position: sticky; top: 0; z-index: 30; background: rgba(247,243,241,0.94); backdrop-filter: blur(10px);
@@ -128,6 +140,16 @@ a { color: inherit; }
 .fp-apply { color: var(--burgundy); }
 .panel-backdrop { position: fixed; inset: 0; z-index: 39; display: none; }
 .panel-backdrop.show { display: block; }
+
+.settings-menu {
+  position: fixed; z-index: 40; background: #fff; border: 1px solid var(--border); border-radius: 14px;
+  box-shadow: 0 14px 34px -10px rgba(36,16,25,.28); padding: 6px; min-width: 180px; display: none;
+}
+.settings-menu.show { display: block; }
+.settings-menu-item { display: flex; align-items: center; gap: 9px; padding: 10px 12px; border-radius: 9px; font-size: 13.5px; font-weight: 600; color: var(--ink); cursor: pointer; }
+.settings-menu-item:hover { background: #F7F1F3; }
+.settings-menu-item.danger { color: var(--burgundy); }
+.settings-menu-divider { height: 1px; background: var(--border); margin: 4px 6px; }
 
 /* ---------- Feed ---------- */
 .result-bar { padding: 10px 16px 2px; font-size: 12px; color: var(--ink-soft); font-weight: 600; }
@@ -192,13 +214,34 @@ a { color: inherit; }
         <div class="onb-sub" id="accountSub">Just so we can personalise things — nothing to verify, no password needed.</div>
         <div id="nameField">
           <div class="field-label">Name</div>
-          <input class="field-input" id="nameInput" placeholder="e.g. Boris Metaliaj">
+          <input class="field-input" id="nameInput" placeholder="e.g. Jamie Fraser">
         </div>
         <div class="field-label">Email</div>
         <input class="field-input" id="emailInput" placeholder="you@st-andrews.ac.uk">
         <div class="onb-error" id="accountError">Please fill in your details to continue.</div>
         <div class="onb-actions">
           <button class="btn-primary" id="accountSubmitBtn" onclick="submitAccount()">Continue</button>
+        </div>
+      </div>
+
+      <div class="onb-step" data-step="section">
+        <div class="onb-title">Which internships?</div>
+        <div class="onb-sub">You can switch between the two anytime from the top nav.</div>
+        <div class="section-choice">
+          <button class="section-card" onclick="chooseSection('europe')">
+            <span class="section-card-emoji">🇪🇺</span>
+            <span class="section-card-text">
+              <span class="section-card-title">Europe</span>
+              <span class="section-card-sub">EU institutions, tech, consulting &amp; more</span>
+            </span>
+          </button>
+          <button class="section-card" onclick="chooseSection('uk')">
+            <span class="section-card-emoji">🇬🇧</span>
+            <span class="section-card-text">
+              <span class="section-card-title">UK Finance</span>
+              <span class="section-card-sub">Banking, trading &amp; buy-side</span>
+            </span>
+          </button>
         </div>
       </div>
 
@@ -219,7 +262,7 @@ a { color: inherit; }
       <div class="topbar-row1">
         <div class="brand">Intern<span>Run</span></div>
         <div class="topbar-actions">
-          <button class="icon-btn" title="Edit preferences" onclick="openEditOverlay()">⚙</button>
+          <button class="icon-btn" id="settingsBtn" title="Settings" onclick="toggleSettingsMenu(event)">⚙</button>
         </div>
       </div>
       <div class="nav-tabs">
@@ -240,13 +283,20 @@ a { color: inherit; }
       <div>Try adjusting your filters or search term.</div>
       <div class="reset-link" onclick="clearAllFilters()">Clear all filters</div>
     </div>
-    <div class="footer">Data sourced from <a href="https://app.the-trackr.com/uk-finance/summer-internships" target="_blank" rel="noopener">The Trackr</a> · listings link out to the official application page where available</div>
+    <div class="footer">InternRun · a free directory of UK finance internships · listings link out to the official application page where available</div>
   </div>
 
 </div>
 
 <div class="panel-backdrop" id="panelBackdrop" onclick="closePanel()"></div>
 <div class="filter-panel" id="filterPanel"></div>
+
+<div class="panel-backdrop" id="settingsBackdrop" onclick="closeSettingsMenu()"></div>
+<div class="settings-menu" id="settingsMenu">
+  <div class="settings-menu-item" onclick="closeSettingsMenu();openEditOverlay()">Edit preferences</div>
+  <div class="settings-menu-divider"></div>
+  <div class="settings-menu-item danger" onclick="signOut()">Sign out</div>
+</div>
 
 <script>
 /* ---------------- Config ---------------- */
@@ -347,7 +397,12 @@ function submitAccount() {
   err.style.display = 'none';
   saveUser(user);
   const hasFilters = !!localStorage.getItem(LS_FILTERS);
-  if (hasFilters) { finishOnboarding(); } else { renderPrefScreen(); goStep('filters'); }
+  if (hasFilters) { finishOnboarding(); } else { goStep('section'); }
+}
+
+function chooseSection(section) {
+  if (section === 'uk') { renderPrefScreen(); goStep('filters'); }
+  else { location.href = '/'; }
 }
 
 function renderPrefScreen() {
@@ -413,6 +468,30 @@ function openEditOverlay() {
 function closeEditOverlay() {
   editingFromApp = false;
   document.getElementById('onbOverlay').style.display = 'none';
+}
+
+function toggleSettingsMenu(e) {
+  e.stopPropagation();
+  closePanel();
+  const menu = document.getElementById('settingsMenu');
+  if (menu.classList.contains('show')) { closeSettingsMenu(); return; }
+  const btn = document.getElementById('settingsBtn');
+  const rect = btn.getBoundingClientRect();
+  menu.style.top = (rect.bottom + 8) + 'px';
+  let left = rect.right - 180;
+  if (left < 12) left = 12;
+  menu.style.left = left + 'px';
+  menu.classList.add('show');
+  document.getElementById('settingsBackdrop').classList.add('show');
+}
+function closeSettingsMenu() {
+  document.getElementById('settingsMenu').classList.remove('show');
+  document.getElementById('settingsBackdrop').classList.remove('show');
+}
+function signOut() {
+  localStorage.removeItem(LS_USER);
+  closeSettingsMenu();
+  location.reload();
 }
 
 /* ---------------- Filter bar (main app) ---------------- */
@@ -629,6 +708,7 @@ async function init() {
   renderFilterBar();
   document.getElementById('searchInput').addEventListener('input', render);
   window.addEventListener('resize', closePanel);
+  window.addEventListener('resize', closeSettingsMenu);
 
   const user = getUser();
   const hasFilters = !!localStorage.getItem(LS_FILTERS);
