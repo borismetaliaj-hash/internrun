@@ -133,7 +133,9 @@ a { color: inherit; }
 .filter-panel.show { display: block; }
 .filter-option { display: flex; align-items: center; gap: 9px; padding: 9px 8px; border-radius: 9px; font-size: 13px; cursor: pointer; }
 .filter-option:hover { background: #F7F1F3; }
+.filter-option.selected { background: #F5E6EB; font-weight: 700; color: var(--burgundy); }
 .filter-option input { accent-color: var(--burgundy); width: 15px; height: 15px; flex-shrink: 0; }
+.filter-panel-summary { font-size: 11.5px; color: var(--burgundy); font-weight: 700; padding: 2px 8px 10px; line-height: 1.4; }
 .filter-panel-actions { display: flex; justify-content: space-between; margin-top: 4px; padding: 8px 6px 2px; border-top: 1px solid var(--border); }
 .filter-panel-actions button { font-size: 12px; font-weight: 700; border: none; background: none; cursor: pointer; padding: 4px; }
 .fp-clear { color: var(--ink-soft); }
@@ -521,20 +523,36 @@ function renderFilterBar() {
   });
 }
 
+function panelSelectedSummary(def) {
+  if (def.type !== 'multi' || !filters[def.key].length) return '';
+  const opts = def.getOptions();
+  const labels = filters[def.key].map((v) => {
+    const o = opts.find((x) => x.value === v);
+    return o ? o.label : v;
+  });
+  return labels.join(', ');
+}
+
 function openPanel(def, buttonEl) {
   if (openPanelKey === def.key) { closePanel(); return; }
   openPanelKey = def.key;
   const panel = document.getElementById('filterPanel');
   panel.innerHTML = '';
+  const summary = document.createElement('div');
+  summary.className = 'filter-panel-summary';
+  const summaryText = panelSelectedSummary(def);
+  summary.textContent = summaryText ? 'Selected: ' + summaryText : '';
+  summary.style.display = summaryText ? 'block' : 'none';
+  panel.appendChild(summary);
   const options = def.getOptions();
   options.forEach((opt) => {
     const row = document.createElement('label');
-    row.className = 'filter-option';
+    const isChecked = def.type === 'multi' ? filters[def.key].includes(opt.value) : filters[def.key] === opt.value;
+    row.className = 'filter-option' + (isChecked ? ' selected' : '');
     const input = document.createElement('input');
     input.type = def.type === 'multi' ? 'checkbox' : 'radio';
     input.name = 'panel-' + def.key;
-    if (def.type === 'multi') { input.checked = filters[def.key].includes(opt.value); }
-    else { input.checked = filters[def.key] === opt.value; }
+    input.checked = isChecked;
     input.onchange = () => {
       if (def.type === 'multi') {
         const idx = filters[def.key].indexOf(opt.value);
@@ -542,7 +560,12 @@ function openPanel(def, buttonEl) {
         if (!input.checked && idx >= 0) filters[def.key].splice(idx, 1);
       } else {
         filters[def.key] = opt.value;
+        panel.querySelectorAll('.filter-option').forEach((r) => r.classList.remove('selected'));
       }
+      row.classList.toggle('selected', input.checked);
+      const newSummary = panelSelectedSummary(def);
+      summary.textContent = newSummary ? 'Selected: ' + newSummary : '';
+      summary.style.display = newSummary ? 'block' : 'none';
       persistFilters();
       renderFilterBar();
       render();
