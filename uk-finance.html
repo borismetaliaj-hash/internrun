@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#7A1F3D">
 <title>UK Finance Internship Tracker — InternRun</title>
-<meta name="description" content="400+ UK finance, banking, consulting and trading internships in one searchable list — bulge bracket, boutiques, buy-side, Big 4, quant trading and more. Sourced from The Trackr.">
+<meta name="description" content="InternRun UK Finance Tracker: 400+ banking, consulting, trading and buy-side internships for University of St Andrews students, sourced from The Trackr.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -14,256 +15,632 @@
   --burgundy-dark: #591530;
   --burgundy-light: #A83A5C;
   --gold: #B8863B;
-  --bg: #FBF6F2;
+  --bg: #F7F3F1;
   --card-bg: #FFFFFF;
-  --ink: #2B1620;
-  --ink-soft: #7A6670;
-  --border: #EFE1E6;
+  --ink: #241019;
+  --ink-soft: #8A7880;
+  --border: #EFE3E7;
   --live: #1F7A4D;
-  --live-bg: #E8F5EC;
-  --no: #A83A3A;
-  --no-bg: #FBEAEA;
 }
-* { box-sizing: border-box; }
-body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--ink); }
-h1, h2, .wordmark, .pill, .card-title { font-family: 'Space Grotesk', sans-serif; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; }
+body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--ink); }
+h1, h2, .brand, .job-title, .onb-title { font-family: 'Space Grotesk', sans-serif; }
+button, input, select { font-family: inherit; }
 a { color: inherit; }
 
-.topbar {
-  position: sticky; top: 0; z-index: 20;
-  background: rgba(251,246,242,0.92); backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--border);
-  padding: 18px 24px 14px;
+.app-shell { max-width: 520px; margin: 0 auto; min-height: 100vh; background: var(--bg); position: relative; }
+
+/* ---------- Onboarding ---------- */
+.onb-overlay {
+  position: fixed; inset: 0; background: var(--bg); z-index: 100;
+  display: flex; flex-direction: column; overflow-y: auto;
 }
-.topbar-inner { max-width: 1160px; margin: 0 auto; }
-.brand-row { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
-.wordmark { font-size: 24px; font-weight: 700; color: var(--ink); letter-spacing: -0.5px; text-decoration: none; }
-.wordmark span { color: var(--burgundy); }
-.back-link { font-size: 13px; font-weight: 600; color: var(--burgundy); text-decoration: none; }
-.back-link:hover { text-decoration: underline; }
-.page-title { font-size: 20px; font-weight: 700; margin: 2px 0 2px; }
-.tagline { font-size: 13px; color: var(--ink-soft); font-weight: 500; }
-.search-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+.onb-inner { max-width: 440px; margin: 0 auto; width: 100%; padding: 40px 24px 32px; flex: 1; display: flex; flex-direction: column; }
+.onb-step { display: none; flex: 1; flex-direction: column; }
+.onb-step.active { display: flex; }
+.onb-close { align-self: flex-end; background: none; border: none; font-size: 20px; color: var(--ink-soft); cursor: pointer; padding: 4px 8px; margin-bottom: 4px; display: none; }
+.onb-close.show { display: block; }
+
+.onb-welcome { justify-content: center; text-align: center; align-items: center; }
+.onb-logo { font-size: 30px; font-weight: 700; margin-bottom: 6px; }
+.onb-logo span { color: var(--burgundy); }
+.onb-tag { font-size: 15px; color: var(--ink-soft); line-height: 1.5; margin-bottom: 36px; max-width: 320px; }
+.onb-tag b { color: var(--ink); }
+
+.btn-primary {
+  width: 100%; padding: 14px; border-radius: 14px; border: none; background: var(--burgundy); color: #fff;
+  font-size: 15px; font-weight: 700; cursor: pointer; transition: background .15s;
+}
+.btn-primary:hover { background: var(--burgundy-dark); }
+
+.onb-title { font-size: 22px; font-weight: 700; margin: 4px 0 4px; }
+.onb-sub { font-size: 13.5px; color: var(--ink-soft); margin-bottom: 24px; }
+.mode-tabs { display: flex; background: #F1E9EC; border-radius: 12px; padding: 3px; margin-bottom: 22px; }
+.mode-tab { flex: 1; text-align: center; padding: 9px; border-radius: 10px; font-size: 13px; font-weight: 700; color: var(--ink-soft); cursor: pointer; border: none; background: none; }
+.mode-tab.active { background: #fff; color: var(--burgundy); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+.field-label { font-size: 12.5px; font-weight: 700; color: var(--ink-soft); margin: 14px 0 6px; }
+.field-input {
+  width: 100%; padding: 12px 14px; border-radius: 12px; border: 1.5px solid var(--border);
+  font-size: 14.5px; background: #fff; color: var(--ink);
+}
+.field-input:focus { outline: none; border-color: var(--burgundy-light); }
+.onb-actions { margin-top: 28px; }
+.onb-error { color: var(--burgundy); font-size: 12.5px; margin-top: 8px; display: none; }
+
+.onb-scroll { flex: 1; overflow-y: auto; }
+.pref-section { margin-bottom: 24px; }
+.pref-label { font-size: 12.5px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 10px; }
+.chip-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  padding: 9px 14px; border-radius: 999px; border: 1.5px solid var(--border); background: #fff;
+  font-size: 13px; font-weight: 600; color: var(--ink); cursor: pointer; transition: all .12s;
+}
+.chip.selected { background: var(--burgundy); border-color: var(--burgundy); color: #fff; }
+.pref-hint { font-size: 12px; color: var(--ink-soft); margin-top: 10px; }
+
+/* ---------- App shell / top bar ---------- */
+.topbar {
+  position: sticky; top: 0; z-index: 30; background: rgba(247,243,241,0.94); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border); padding: 12px 16px 8px;
+}
+.topbar-row1 { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.brand { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
+.brand span { color: var(--burgundy); }
+.topbar-actions { display: flex; align-items: center; gap: 6px; }
+.icon-btn {
+  width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid var(--border); background: #fff;
+  display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; color: var(--ink-soft);
+}
+.nav-tabs { display: flex; background: #F1E9EC; border-radius: 999px; padding: 3px; margin-bottom: 10px; }
+.nav-tab { flex: 1; text-align: center; padding: 7px 6px; border-radius: 999px; font-size: 12px; font-weight: 700; color: var(--ink-soft); text-decoration: none; }
+.nav-tab.active { background: var(--burgundy); color: #fff; }
+
+.search-wrap { position: relative; margin-bottom: 10px; }
+.search-icon { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); opacity: .45; font-size: 13px; pointer-events: none; }
 .search-input {
-  flex: 1 1 260px; padding: 11px 16px; border-radius: 12px; border: 1.5px solid var(--border);
-  background: #fff; font-family: 'Inter', sans-serif; font-size: 14px; color: var(--ink);
+  width: 100%; padding: 10px 14px 10px 34px; border-radius: 12px; border: 1.5px solid var(--border);
+  font-size: 13.5px; background: #fff; color: var(--ink);
 }
 .search-input:focus { outline: none; border-color: var(--burgundy-light); }
-.pill-row { display: flex; gap: 8px; overflow-x: auto; padding: 12px 2px 2px; -ms-overflow-style: none; scrollbar-width: none; }
-.pill-row::-webkit-scrollbar { display: none; }
-.filter-label {
-  font-size: 10.5px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
-  color: var(--ink-soft); padding: 10px 2px 4px;
-}
-.pill {
-  flex-shrink: 0; padding: 7px 14px; border-radius: 999px; border: 1.5px solid var(--border);
-  background: #fff; font-size: 12.5px; font-weight: 600; color: var(--ink-soft); cursor: pointer;
-  transition: all .15s;
-}
-.pill:hover { border-color: var(--burgundy-light); color: var(--burgundy); }
-.pill.active { background: var(--burgundy); border-color: var(--burgundy); color: #fff; }
-.pill.active.gold { background: var(--gold); border-color: var(--gold); }
 
-.wrap { max-width: 1160px; margin: 0 auto; padding: 24px; }
-.source-note { font-size: 12px; color: var(--ink-soft); margin: 0 0 14px; }
-.source-note a { color: var(--burgundy); font-weight: 600; text-decoration: none; }
-.source-note a:hover { text-decoration: underline; }
-.result-count { font-size: 13px; color: var(--ink-soft); margin: 0 0 16px; font-weight: 500; }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 12px; }
+.filter-bar { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; -ms-overflow-style: none; scrollbar-width: none; }
+.filter-bar::-webkit-scrollbar { display: none; }
+.filter-pill {
+  flex-shrink: 0; display: flex; align-items: center; gap: 4px; padding: 7px 12px; border-radius: 999px;
+  border: 1.5px solid var(--border); background: #fff; font-size: 12px; font-weight: 700; color: var(--ink); cursor: pointer;
+}
+.filter-pill.active { border-color: var(--burgundy); color: var(--burgundy); background: rgba(122,31,61,.06); }
+.filter-pill .chev { font-size: 8px; opacity: .55; }
 
-.card {
-  background: var(--card-bg); border: 1px solid var(--border); border-left: 4px solid var(--burgundy);
-  border-radius: 12px; padding: 15px; display: flex; flex-direction: column; gap: 6px;
-  transition: transform .12s, box-shadow .12s;
+.filter-panel {
+  position: fixed; z-index: 40; background: #fff; border: 1px solid var(--border); border-radius: 14px;
+  box-shadow: 0 14px 34px -10px rgba(36,16,25,.28); padding: 8px; min-width: 200px; max-width: 270px;
+  max-height: 340px; overflow-y: auto; display: none;
 }
-.card:hover { transform: translateY(-2px); box-shadow: 0 10px 24px -12px rgba(122,31,61,0.25); }
-.chip-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.sector-chip {
-  font-size: 10px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase;
-  color: var(--burgundy); background: rgba(122,31,61,0.08); padding: 3px 9px; border-radius: 999px;
-}
-.rolling-chip {
-  font-size: 10px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase;
-  color: var(--gold); background: rgba(184,134,59,0.12); padding: 3px 9px; border-radius: 999px;
-}
-.visa-chip { font-size: 10px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; }
-.visa-chip.yes { color: var(--live); background: var(--live-bg); }
-.visa-chip.no { color: var(--no); background: var(--no-bg); }
-.card-org { font-size: 12px; font-weight: 600; color: var(--ink-soft); }
-.card-title { font-size: 15px; font-weight: 600; color: var(--ink); line-height: 1.3; margin: 0; }
-.card-note { font-size: 12px; color: var(--burgundy-dark); font-weight: 500; }
-.card-link {
-  margin-top: 4px; align-self: flex-start; text-decoration: none; font-size: 12.5px; font-weight: 700;
-  color: var(--burgundy); border: 1.5px solid var(--burgundy); padding: 6px 12px; border-radius: 9px;
-  transition: background .12s, color .12s;
-}
-.card-link:hover { background: var(--burgundy); color: #fff; }
+.filter-panel.show { display: block; }
+.filter-option { display: flex; align-items: center; gap: 9px; padding: 9px 8px; border-radius: 9px; font-size: 13px; cursor: pointer; }
+.filter-option:hover { background: #F7F1F3; }
+.filter-option input { accent-color: var(--burgundy); width: 15px; height: 15px; flex-shrink: 0; }
+.filter-panel-actions { display: flex; justify-content: space-between; margin-top: 4px; padding: 8px 6px 2px; border-top: 1px solid var(--border); }
+.filter-panel-actions button { font-size: 12px; font-weight: 700; border: none; background: none; cursor: pointer; padding: 4px; }
+.fp-clear { color: var(--ink-soft); }
+.fp-apply { color: var(--burgundy); }
+.panel-backdrop { position: fixed; inset: 0; z-index: 39; display: none; }
+.panel-backdrop.show { display: block; }
 
-.empty-state { text-align: center; padding: 60px 20px; color: var(--ink-soft); }
-.empty-state .big { font-size: 34px; margin-bottom: 8px; }
+/* ---------- Feed ---------- */
+.result-bar { padding: 10px 16px 2px; font-size: 12px; color: var(--ink-soft); font-weight: 600; }
+.feed { padding: 8px 16px 40px; display: flex; flex-direction: column; gap: 10px; }
 
-.footer {
-  max-width: 1160px; margin: 20px auto 40px; padding: 20px 24px 0; border-top: 1px solid var(--border);
-  font-size: 12px; color: var(--ink-soft); text-align: center;
+.job-card {
+  display: block; background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px;
+  padding: 13px 13px 12px; text-decoration: none; color: inherit; transition: box-shadow .15s, transform .12s;
 }
+.job-card:hover { box-shadow: 0 10px 24px -12px rgba(36,16,25,.22); transform: translateY(-1px); }
+.job-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.job-card-head { display: flex; gap: 10px; align-items: flex-start; min-width: 0; }
+.avatar {
+  width: 36px; height: 36px; border-radius: 10px; color: #fff; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 14px; flex-shrink: 0; font-family: 'Space Grotesk', sans-serif;
+}
+.job-info { min-width: 0; }
+.job-company { font-size: 11px; color: var(--ink-soft); font-weight: 700; text-transform: uppercase; letter-spacing: .3px; display: flex; align-items: center; gap: 5px; }
+.sector-tag { font-size: 10px; font-weight: 700; color: var(--burgundy); background: rgba(122,31,61,.08); padding: 2px 8px; border-radius: 999px; text-transform: none; letter-spacing: 0; flex-shrink: 0; }
+.job-title { font-size: 15.5px; font-weight: 700; color: var(--ink); line-height: 1.32; margin-top: 3px; }
+.save-btn {
+  flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  background: none; border: none; color: #D8C7CE; cursor: pointer; font-size: 18px; line-height: 1;
+}
+.save-btn.saved { color: var(--gold); }
+.job-meta { margin-top: 10px; font-size: 12px; color: var(--ink-soft); display: flex; flex-wrap: wrap; align-items: center; }
+.job-meta span:not(:last-child)::after { content: '·'; margin: 0 6px; color: var(--border); }
+
+.empty-state { text-align: center; padding: 70px 24px; color: var(--ink-soft); }
+.empty-state .big { font-size: 32px; margin-bottom: 8px; }
+.empty-state .reset-link { display: inline-block; margin-top: 12px; color: var(--burgundy); font-weight: 700; font-size: 13px; cursor: pointer; }
+
+.footer { padding: 16px 24px 32px; font-size: 11.5px; color: var(--ink-soft); text-align: center; }
 .footer a { color: var(--burgundy); font-weight: 600; text-decoration: none; }
-.footer a:hover { text-decoration: underline; }
 
-@media (max-width: 640px) {
-  .topbar { padding: 14px 16px 10px; }
-  .wrap { padding: 16px; }
-  .grid { grid-template-columns: 1fr; }
+@media (max-width: 380px) {
+  .filter-pill { font-size: 11.5px; padding: 6px 10px; }
 }
 </style>
 </head>
 <body>
 
-<div class="topbar">
-  <div class="topbar-inner">
-    <div class="brand-row">
-      <a class="wordmark" href="/">Intern<span>Run</span></a>
-      <a class="back-link" href="/">← All internships</a>
+<div class="app-shell">
+
+  <!-- ===== Onboarding overlay ===== -->
+  <div class="onb-overlay" id="onbOverlay">
+    <div class="onb-inner">
+      <button class="onb-close" id="onbCloseBtn" onclick="closeEditOverlay()">✕</button>
+
+      <div class="onb-step onb-welcome" data-step="welcome">
+        <div class="onb-logo">Intern<span>Run</span></div>
+        <div class="onb-tag">400+ UK finance internships — banking, consulting, trading and buy-side — built for <b>University of St Andrews</b> students. Set your filters once, then browse a clean feed.</div>
+        <button class="btn-primary" onclick="goStep('account')">Get started</button>
+      </div>
+
+      <div class="onb-step" data-step="account">
+        <div class="mode-tabs">
+          <button class="mode-tab active" id="tabCreate" onclick="setAuthMode('create')">Create account</button>
+          <button class="mode-tab" id="tabSignin" onclick="setAuthMode('signin')">Sign in</button>
+        </div>
+        <div class="onb-title" id="accountTitle">Create your account</div>
+        <div class="onb-sub" id="accountSub">Just so we can personalise things — nothing to verify, no password needed.</div>
+        <div id="nameField">
+          <div class="field-label">Name</div>
+          <input class="field-input" id="nameInput" placeholder="e.g. Boris Metaliaj">
+        </div>
+        <div class="field-label">Email</div>
+        <input class="field-input" id="emailInput" placeholder="you@st-andrews.ac.uk">
+        <div class="onb-error" id="accountError">Please fill in your details to continue.</div>
+        <div class="onb-actions">
+          <button class="btn-primary" id="accountSubmitBtn" onclick="submitAccount()">Continue</button>
+        </div>
+      </div>
+
+      <div class="onb-step" data-step="filters">
+        <div class="onb-title">Set your preferences</div>
+        <div class="onb-sub">You can change these anytime from the feed.</div>
+        <div class="onb-scroll" id="prefScroll"></div>
+        <div class="onb-actions">
+          <button class="btn-primary" id="filtersSubmitBtn" onclick="submitFilters()">See internships</button>
+        </div>
+      </div>
     </div>
-    <div class="page-title">UK Finance Internship Tracker</div>
-    <div class="tagline">400+ banking, consulting, trading & buy-side internships in one place, sourced from The Trackr.</div>
-    <div class="search-row">
-      <input class="search-input" id="searchInput" placeholder="Search by company or programme…">
-    </div>
-    <div class="filter-label">Sector</div>
-    <div class="pill-row" id="sectorRow"></div>
-    <div class="filter-label">Applications</div>
-    <div class="pill-row" id="rollingRow"></div>
-    <div class="filter-label">UK Visa Sponsorship</div>
-    <div class="pill-row" id="visaRow"></div>
   </div>
+
+  <!-- ===== Main app ===== -->
+  <div id="mainApp" style="display:none;">
+    <div class="topbar">
+      <div class="topbar-row1">
+        <div class="brand">Intern<span>Run</span></div>
+        <div class="topbar-actions">
+          <button class="icon-btn" title="Edit preferences" onclick="openEditOverlay()">⚙</button>
+        </div>
+      </div>
+      <div class="nav-tabs">
+        <a class="nav-tab" href="/">Europe</a>
+        <a class="nav-tab active" href="/uk-finance.html">UK Finance</a>
+      </div>
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input class="search-input" id="searchInput" placeholder="Search by company or programme…">
+      </div>
+      <div class="filter-bar" id="filterBar"></div>
+    </div>
+
+    <p class="result-bar" id="resultCount"></p>
+    <div class="feed" id="feed"></div>
+    <div class="empty-state" id="emptyState" style="display:none;">
+      <div class="big">No matches</div>
+      <div>Try adjusting your filters or search term.</div>
+      <div class="reset-link" onclick="clearAllFilters()">Clear all filters</div>
+    </div>
+    <div class="footer">Data sourced from <a href="https://app.the-trackr.com/uk-finance/summer-internships" target="_blank" rel="noopener">The Trackr</a> · listings link out to the official application page where available</div>
+  </div>
+
 </div>
 
-<div class="wrap">
-  <p class="source-note">Data sourced from <a href="https://app.the-trackr.com/uk-finance/summer-internships" target="_blank" rel="noopener">The Trackr</a> · listings link out to the official application page where available, otherwise to The Trackr.</p>
-  <p class="result-count" id="resultCount"></p>
-  <div class="grid" id="grid"></div>
-  <div class="empty-state" id="emptyState" style="display:none;">
-    <div class="big">No matches</div>
-    <div>Try a different sector or search term.</div>
-  </div>
-</div>
-
-<div class="footer">InternRun · a free, no-signup directory of internships across Europe · UK finance data via <a href="https://app.the-trackr.com" target="_blank" rel="noopener">The Trackr</a></div>
+<div class="panel-backdrop" id="panelBackdrop" onclick="closePanel()"></div>
+<div class="filter-panel" id="filterPanel"></div>
 
 <script>
-const ROLLING_LABELS = { all: 'All', yes: 'Rolling / no deadline', no: 'Fixed deadline' };
-const VISA_LABELS = { all: 'All', yes: 'Sponsors visa', no: "Doesn't sponsor" };
+/* ---------------- Config ---------------- */
+let SECTOR_OPTIONS = [];
+const APPLICATIONS_OPTIONS = [
+  { value: 'all', label: 'Either' },
+  { value: 'rolling', label: 'Rolling / no deadline' },
+  { value: 'fixed', label: 'Fixed deadline' },
+];
+const VISA_OPTIONS = [
+  { value: 'all', label: 'Either' },
+  { value: 'sponsors', label: 'Sponsors UK visa' },
+  { value: 'no', label: "Doesn't sponsor" },
+];
+const SORT_OPTIONS = [
+  { value: 'relevance', label: 'Relevance' },
+  { value: 'company', label: 'Company (A–Z)' },
+  { value: 'role', label: 'Role (A–Z)' },
+  { value: 'deadline', label: 'Deadline (soonest)' },
+];
+
+const AVATAR_PALETTE = ['#7A1F3D', '#B8863B', '#3D6B7A', '#4D7A3D', '#6B3D7A', '#3D4D7A'];
+
+const FILTER_DEFS = [
+  { key: 'sector', label: 'Sector', type: 'multi', getOptions: () => SECTOR_OPTIONS },
+  { key: 'applications', label: 'Applications', type: 'single', getOptions: () => APPLICATIONS_OPTIONS },
+  { key: 'visa', label: 'UK Visa', type: 'single', getOptions: () => VISA_OPTIONS },
+  { key: 'sort', label: 'Sort', type: 'single', getOptions: () => SORT_OPTIONS },
+];
+const ONB_FILTER_KEYS = ['sector', 'applications', 'visa'];
+const DEFAULT_FILTERS = { sector: [], applications: 'all', visa: 'all', sort: 'relevance' };
+
+const LS_USER = 'ir_user';
+const LS_FILTERS = 'ir_filters_ukf';
+const LS_SAVED = 'ir_saved_ukf';
+
 let ALL_ITEMS = [];
-let SECTOR_ORDER = [];
-let activeSector = 'all';
-let activeRolling = 'all';
-let activeVisa = 'all';
+let filters = loadFilters();
+let authMode = 'create';
+let editingFromApp = false;
+let openPanelKey = null;
 
-function sectorRow() {
-  const el = document.getElementById('sectorRow');
+/* ---------------- Storage helpers ---------------- */
+function getUser() { try { return JSON.parse(localStorage.getItem(LS_USER)); } catch (e) { return null; } }
+function saveUser(u) { localStorage.setItem(LS_USER, JSON.stringify(u)); }
+function loadFilters() {
+  try {
+    const raw = localStorage.getItem(LS_FILTERS);
+    if (!raw) return Object.assign({}, DEFAULT_FILTERS, { sector: [] });
+    const parsed = JSON.parse(raw);
+    return Object.assign({}, DEFAULT_FILTERS, parsed);
+  } catch (e) { return Object.assign({}, DEFAULT_FILTERS); }
+}
+function persistFilters() { localStorage.setItem(LS_FILTERS, JSON.stringify(filters)); }
+function getSaved() { try { return JSON.parse(localStorage.getItem(LS_SAVED)) || []; } catch (e) { return []; } }
+function isSaved(id) { return getSaved().includes(id); }
+function toggleSave(btn) {
+  const id = btn.getAttribute('data-save');
+  let saved = getSaved();
+  if (saved.includes(id)) { saved = saved.filter((x) => x !== id); btn.classList.remove('saved'); btn.textContent = '☆'; }
+  else { saved.push(id); btn.classList.add('saved'); btn.textContent = '★'; }
+  localStorage.setItem(LS_SAVED, JSON.stringify(saved));
+}
+
+/* ---------------- Onboarding flow ---------------- */
+function goStep(step) {
+  document.querySelectorAll('.onb-step').forEach((el) => el.classList.remove('active'));
+  document.querySelector('.onb-step[data-step="' + step + '"]').classList.add('active');
+}
+
+function setAuthMode(mode) {
+  authMode = mode;
+  document.getElementById('tabCreate').classList.toggle('active', mode === 'create');
+  document.getElementById('tabSignin').classList.toggle('active', mode === 'signin');
+  document.getElementById('nameField').style.display = mode === 'create' ? 'block' : 'none';
+  document.getElementById('accountTitle').textContent = mode === 'create' ? 'Create your account' : 'Welcome back';
+  document.getElementById('accountSub').textContent = mode === 'create'
+    ? 'Just so we can personalise things — nothing to verify, no password needed.'
+    : 'Enter the email you used before.';
+  document.getElementById('accountSubmitBtn').textContent = mode === 'create' ? 'Continue' : 'Sign in';
+  document.getElementById('accountError').style.display = 'none';
+}
+
+function submitAccount() {
+  const email = document.getElementById('emailInput').value.trim();
+  const nameInput = document.getElementById('nameInput').value.trim();
+  const err = document.getElementById('accountError');
+  if (!email) { err.style.display = 'block'; return; }
+  let user;
+  if (authMode === 'signin') {
+    const existing = getUser();
+    const name = (existing && existing.email === email) ? existing.name : email.split('@')[0];
+    user = { name: name, email: email };
+  } else {
+    if (!nameInput) { err.style.display = 'block'; return; }
+    user = { name: nameInput, email: email };
+  }
+  err.style.display = 'none';
+  saveUser(user);
+  const hasFilters = !!localStorage.getItem(LS_FILTERS);
+  if (hasFilters) { finishOnboarding(); } else { renderPrefScreen(); goStep('filters'); }
+}
+
+function renderPrefScreen() {
+  const el = document.getElementById('prefScroll');
   el.innerHTML = '';
-  const keys = ['all', ...SECTOR_ORDER];
-  keys.forEach((key) => {
+  ONB_FILTER_KEYS.forEach((key) => {
+    const def = FILTER_DEFS.find((d) => d.key === key);
+    const options = def.getOptions();
+    const section = document.createElement('div');
+    section.className = 'pref-section';
+    const label = document.createElement('div');
+    label.className = 'pref-label';
+    label.textContent = def.label + (def.type === 'multi' ? ' (pick any)' : '');
+    section.appendChild(label);
+    const grid = document.createElement('div');
+    grid.className = 'chip-grid';
+    options.forEach((opt) => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'chip';
+      chip.textContent = opt.label;
+      const isSelected = def.type === 'multi' ? filters[key].includes(opt.value) : filters[key] === opt.value;
+      if (isSelected) chip.classList.add('selected');
+      chip.onclick = () => {
+        if (def.type === 'multi') {
+          const idx = filters[key].indexOf(opt.value);
+          if (idx >= 0) filters[key].splice(idx, 1); else filters[key].push(opt.value);
+        } else {
+          filters[key] = opt.value;
+        }
+        renderPrefScreen();
+      };
+      grid.appendChild(chip);
+    });
+    section.appendChild(grid);
+    el.appendChild(section);
+  });
+  const hint = document.createElement('div');
+  hint.className = 'pref-hint';
+  hint.textContent = 'Leave a section empty to see everything in that category.';
+  el.appendChild(hint);
+}
+
+function submitFilters() {
+  persistFilters();
+  if (editingFromApp) { closeEditOverlay(); render(); return; }
+  finishOnboarding();
+}
+
+function finishOnboarding() {
+  document.getElementById('onbOverlay').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'block';
+}
+
+function openEditOverlay() {
+  editingFromApp = true;
+  document.getElementById('onbOverlay').style.display = 'flex';
+  document.getElementById('onbCloseBtn').classList.add('show');
+  document.getElementById('filtersSubmitBtn').textContent = 'Save';
+  renderPrefScreen();
+  goStep('filters');
+}
+function closeEditOverlay() {
+  editingFromApp = false;
+  document.getElementById('onbOverlay').style.display = 'none';
+}
+
+/* ---------------- Filter bar (main app) ---------------- */
+function filterSummary(def) {
+  if (def.key === 'sort') { const o = SORT_OPTIONS.find((x) => x.value === filters.sort); return o ? o.label : 'Sort'; }
+  if (def.type === 'multi') {
+    const n = filters[def.key].length;
+    return n ? def.label + ' (' + n + ')' : def.label;
+  }
+  if (filters[def.key] === 'all') return def.label;
+  const opts = def.getOptions();
+  const o = opts.find((x) => x.value === filters[def.key]);
+  return o ? o.label : def.label;
+}
+
+function renderFilterBar() {
+  const bar = document.getElementById('filterBar');
+  bar.innerHTML = '';
+  FILTER_DEFS.forEach((def) => {
     const btn = document.createElement('button');
-    btn.className = 'pill' + (key === activeSector ? ' active' : '');
-    btn.textContent = key === 'all' ? 'All' : key;
-    btn.onclick = () => { activeSector = key; sectorRow(); render(); };
-    el.appendChild(btn);
+    btn.className = 'filter-pill';
+    const active = def.type === 'multi' ? filters[def.key].length > 0 : (def.key !== 'sort' && filters[def.key] !== 'all');
+    if (active) btn.classList.add('active');
+    btn.innerHTML = '<span>' + escapeHtml(filterSummary(def)) + '</span><span class="chev">▾</span>';
+    btn.onclick = (e) => openPanel(def, btn);
+    bar.appendChild(btn);
   });
 }
 
-function rollingRow() {
-  const el = document.getElementById('rollingRow');
-  el.innerHTML = '';
-  Object.keys(ROLLING_LABELS).forEach((key) => {
-    const btn = document.createElement('button');
-    btn.className = 'pill' + (key === activeRolling ? ' active gold' : '');
-    btn.textContent = ROLLING_LABELS[key];
-    btn.onclick = () => { activeRolling = key; rollingRow(); render(); };
-    el.appendChild(btn);
+function openPanel(def, buttonEl) {
+  if (openPanelKey === def.key) { closePanel(); return; }
+  openPanelKey = def.key;
+  const panel = document.getElementById('filterPanel');
+  panel.innerHTML = '';
+  const options = def.getOptions();
+  options.forEach((opt) => {
+    const row = document.createElement('label');
+    row.className = 'filter-option';
+    const input = document.createElement('input');
+    input.type = def.type === 'multi' ? 'checkbox' : 'radio';
+    input.name = 'panel-' + def.key;
+    if (def.type === 'multi') { input.checked = filters[def.key].includes(opt.value); }
+    else { input.checked = filters[def.key] === opt.value; }
+    input.onchange = () => {
+      if (def.type === 'multi') {
+        const idx = filters[def.key].indexOf(opt.value);
+        if (input.checked && idx < 0) filters[def.key].push(opt.value);
+        if (!input.checked && idx >= 0) filters[def.key].splice(idx, 1);
+      } else {
+        filters[def.key] = opt.value;
+      }
+      persistFilters();
+      renderFilterBar();
+      render();
+      if (def.type === 'single') closePanel();
+    };
+    row.appendChild(input);
+    const span = document.createElement('span');
+    span.textContent = opt.label;
+    row.appendChild(span);
+    panel.appendChild(row);
   });
+  const actions = document.createElement('div');
+  actions.className = 'filter-panel-actions';
+  const clearBtn = document.createElement('button');
+  clearBtn.className = 'fp-clear';
+  clearBtn.textContent = 'Clear';
+  clearBtn.onclick = () => {
+    filters[def.key] = def.type === 'multi' ? [] : (def.key === 'sort' ? 'relevance' : 'all');
+    persistFilters(); renderFilterBar(); render(); closePanel();
+  };
+  const doneBtn = document.createElement('button');
+  doneBtn.className = 'fp-apply';
+  doneBtn.textContent = 'Done';
+  doneBtn.onclick = closePanel;
+  actions.appendChild(clearBtn);
+  actions.appendChild(doneBtn);
+  panel.appendChild(actions);
+
+  const rect = buttonEl.getBoundingClientRect();
+  panel.style.top = (rect.bottom + 8) + 'px';
+  let left = rect.left;
+  const maxLeft = window.innerWidth - 270 - 12;
+  if (left > maxLeft) left = Math.max(12, maxLeft);
+  panel.style.left = left + 'px';
+  panel.classList.add('show');
+  document.getElementById('panelBackdrop').classList.add('show');
+}
+function closePanel() {
+  openPanelKey = null;
+  document.getElementById('filterPanel').classList.remove('show');
+  document.getElementById('panelBackdrop').classList.remove('show');
+}
+function clearAllFilters() {
+  filters = Object.assign({}, DEFAULT_FILTERS, { sector: [] });
+  persistFilters();
+  document.getElementById('searchInput').value = '';
+  renderFilterBar();
+  render();
 }
 
-function visaRow() {
-  const el = document.getElementById('visaRow');
-  el.innerHTML = '';
-  Object.keys(VISA_LABELS).forEach((key) => {
-    const btn = document.createElement('button');
-    btn.className = 'pill' + (key === activeVisa ? ' active' : '');
-    btn.textContent = VISA_LABELS[key];
-    btn.onclick = () => { activeVisa = key; visaRow(); render(); };
-    el.appendChild(btn);
-  });
+/* ---------------- Data + rendering ---------------- */
+function populateSectors(sectorOrder) {
+  SECTOR_OPTIONS = (sectorOrder || []).map((s) => ({ value: s, label: s }));
+}
+
+function parseDeadline(note) {
+  if (!note) return null;
+  const m = note.match(/Closes\s+(\d{1,2})\s+([A-Za-z]{3})\s+(\d{2})/);
+  if (!m) return null;
+  const months = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
+  const mon = months[m[2]];
+  if (mon === undefined) return null;
+  return new Date(2000 + (+m[3]), mon, +m[1]);
+}
+
+function applicationsLabel(it) {
+  if (it.rolling === true) return 'Rolling applications';
+  const d = parseDeadline(it.note);
+  if (d) return 'Closes ' + d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  if (it.rolling === false) return 'Fixed deadline';
+  return '';
 }
 
 function matchesFilters(it, q) {
-  if (activeSector !== 'all' && it.sector !== activeSector) return false;
-  if (activeRolling === 'yes' && it.rolling !== true) return false;
-  if (activeRolling === 'no' && it.rolling !== false) return false;
-  if (activeVisa === 'yes' && it.sponsorsVisa !== true) return false;
-  if (activeVisa === 'no' && it.sponsorsVisa !== false) return false;
+  if (filters.sector.length && !filters.sector.includes(it.sector)) return false;
+  if (filters.applications === 'rolling' && it.rolling !== true) return false;
+  if (filters.applications === 'fixed' && it.rolling !== false) return false;
+  if (filters.visa === 'sponsors' && it.sponsorsVisa !== true) return false;
+  if (filters.visa === 'no' && it.sponsorsVisa !== false) return false;
   if (q) {
-    const hay = (it.title + ' ' + it.org + ' ' + it.sector).toLowerCase();
-    if (!hay.includes(q.toLowerCase())) return false;
+    const hay = (it.title + ' ' + it.org + ' ' + it.sector + ' ' + (it.note || '')).toLowerCase();
+    if (!hay.includes(q)) return false;
   }
   return true;
 }
 
-function visaChip(it) {
-  if (it.sponsorsVisa === true) return '<span class="visa-chip yes">Sponsors visa</span>';
-  if (it.sponsorsVisa === false) return '<span class="visa-chip no">No sponsorship</span>';
-  return '';
+function sortItems(items) {
+  const arr = items.slice();
+  if (filters.sort === 'company') arr.sort((a, b) => (a.org || '').localeCompare(b.org || ''));
+  else if (filters.sort === 'role') arr.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+  else if (filters.sort === 'deadline') {
+    arr.sort((a, b) => {
+      const da = parseDeadline(a.note), db = parseDeadline(b.note);
+      if (da && db) return da - db;
+      if (da) return -1;
+      if (db) return 1;
+      return 0;
+    });
+  }
+  return arr;
+}
+
+function avatarColor(name) {
+  let hash = 0;
+  for (let i = 0; i < (name || '').length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+  return AVATAR_PALETTE[hash % AVATAR_PALETTE.length];
+}
+
+function cardHtml(it) {
+  const id = it.id || it.url;
+  const initial = (it.org || '?').trim().charAt(0).toUpperCase() || '?';
+  const appsLabel = applicationsLabel(it);
+  const visaLabel = it.sponsorsVisa === true ? 'Sponsors UK visa' : it.sponsorsVisa === false ? "Doesn't sponsor visa" : '';
+  const saved = isSaved(id);
+  return '' +
+    '<a class="job-card" href="' + it.url + '" target="_blank" rel="noopener">' +
+      '<div class="job-card-top">' +
+        '<div class="job-card-head">' +
+          '<div class="avatar" style="background:' + avatarColor(it.org || '') + '">' + escapeHtml(initial) + '</div>' +
+          '<div class="job-info">' +
+            '<div class="job-company">' + escapeHtml(it.org) + '<span class="sector-tag">' + escapeHtml(it.sector || '') + '</span></div>' +
+            '<div class="job-title">' + escapeHtml(it.title) + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<button class="save-btn' + (saved ? ' saved' : '') + '" data-save="' + escapeHtml(id) + '" onclick="event.preventDefault();event.stopPropagation();toggleSave(this)">' + (saved ? '★' : '☆') + '</button>' +
+      '</div>' +
+      '<div class="job-meta">' +
+        (appsLabel ? '<span>' + escapeHtml(appsLabel) + '</span>' : '') +
+        (visaLabel ? '<span>' + escapeHtml(visaLabel) + '</span>' : '') +
+      '</div>' +
+    '</a>';
 }
 
 function render() {
-  const q = document.getElementById('searchInput').value.trim();
-  const items = ALL_ITEMS.filter((it) => matchesFilters(it, q));
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  let items = ALL_ITEMS.filter((it) => matchesFilters(it, q));
+  items = sortItems(items);
 
   document.getElementById('resultCount').textContent = items.length + (items.length === 1 ? ' listing' : ' listings');
-  const grid = document.getElementById('grid');
+  const feed = document.getElementById('feed');
   const empty = document.getElementById('emptyState');
-  grid.innerHTML = '';
-
-  if (!items.length) { empty.style.display = 'block'; return; }
+  if (!items.length) { feed.innerHTML = ''; empty.style.display = 'block'; return; }
   empty.style.display = 'none';
-
-  items.forEach((it) => {
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.innerHTML = `
-      <div class="chip-row">
-        <span class="sector-chip">${escapeHtml(it.sector)}</span>
-        ${it.rolling === true ? '<span class="rolling-chip">Rolling</span>' : ''}
-        ${visaChip(it)}
-      </div>
-      <div class="card-org">${escapeHtml(it.org)}</div>
-      <h3 class="card-title">${escapeHtml(it.title)}</h3>
-      ${it.note ? '<div class="card-note">' + escapeHtml(it.note) + '</div>' : ''}
-      <a class="card-link" href="${it.url}" target="_blank" rel="noopener">View →</a>
-    `;
-    grid.appendChild(card);
-  });
+  feed.innerHTML = items.map(cardHtml).join('');
 }
 
 function escapeHtml(s) {
   return String(s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
-async function init() {
+/* ---------------- Init ---------------- */
+async function loadData() {
   try {
     const res = await fetch('/api/uk-finance', { cache: 'no-store' });
     const data = await res.json();
     ALL_ITEMS = data.items || [];
-    SECTOR_ORDER = data.sectorOrder || [];
-  } catch (e) {
-    ALL_ITEMS = [];
-    SECTOR_ORDER = [];
-  }
-  sectorRow();
-  rollingRow();
-  visaRow();
-  render();
+    populateSectors(data.sectorOrder);
+  } catch (e) { ALL_ITEMS = []; populateSectors([]); }
+}
+
+async function init() {
+  await loadData();
+  renderFilterBar();
   document.getElementById('searchInput').addEventListener('input', render);
+  window.addEventListener('resize', closePanel);
+
+  const user = getUser();
+  const hasFilters = !!localStorage.getItem(LS_FILTERS);
+  if (!user) {
+    goStep('welcome');
+  } else if (!hasFilters) {
+    renderPrefScreen();
+    goStep('filters');
+  } else {
+    finishOnboarding();
+  }
+  render();
 }
 init();
 </script>
