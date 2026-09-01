@@ -358,16 +358,151 @@ async function fetchEuCareersHighlights() {
   }
 }
 
+// --- Live source: SimplifyJobs Summer2027-Internships feed ---
+// Public, no-auth JSON feed maintained by SimplifyJobs (raw.githubusercontent.com — GitHub serves
+// this to anyone, no ToS or robots.txt issue), updated continuously as postings open and close.
+// This is what makes "new internships appear, filled ones disappear" work with no extra plumbing:
+// every listing carries an explicit `active` flag, so a fresh fetch each cache cycle naturally
+// drops anything that's closed — no snapshot/database needed for removal. "New" is derived the
+// same stateless way, from `date_posted`: no persistent storage required, so no GitHub token or
+// cron job is needed to make the "New" badge work.
+const SIMPLIFY_FEED_URL = 'https://raw.githubusercontent.com/SimplifyJobs/Summer2027-Internships/dev/.github/scripts/listings.json';
+const NEW_WINDOW_MS = 7 * 24 * 60 * 60 * 1000; // posted within the last 7 days = "New" badge
+
+let simplifyCache = { items: [], fetchedAt: 0 };
+
+function mapSimplifyCategory(cat) {
+  return /quant|finance/i.test(cat || '') ? 'finance' : 'tech';
+}
+
+function seasonsFromTerms(terms) {
+  if (!Array.isArray(terms) || !terms.length) return ['other'];
+  const seasons = new Set();
+  terms.forEach((t) => {
+    const lower = (t || '').toLowerCase();
+    if (lower.includes('summer')) seasons.add('summer');
+    else if (lower.includes('spring')) seasons.add('spring');
+    else seasons.add('other');
+  });
+  return Array.from(seasons);
+}
+
+// SimplifyJobs locations are an array of free-text strings, and real postings write them far more
+// often as "London, UK" or just "Dublin" than "London, United Kingdom" — EUROPEAN_COUNTRIES alone
+// (which only matches full country names) misses both. These two lookups cover the gap: common
+// abbreviations/nations-within-the-UK, and the European hub cities that show up unqualified.
+const COUNTRY_ALIASES = {
+  'UK': 'United Kingdom', 'U.K.': 'United Kingdom', 'England': 'United Kingdom',
+  'Scotland': 'United Kingdom', 'Wales': 'United Kingdom', 'Northern Ireland': 'United Kingdom'
+};
+const EU_HUB_CITIES = {
+  London: 'United Kingdom', Manchester: 'United Kingdom', Edinburgh: 'United Kingdom', Bristol: 'United Kingdom',
+  Cambridge: 'United Kingdom', Oxford: 'United Kingdom', Belfast: 'United Kingdom', Glasgow: 'United Kingdom',
+  Dublin: 'Ireland', Cork: 'Ireland',
+  Berlin: 'Germany', Munich: 'Germany', Frankfurt: 'Germany', Hamburg: 'Germany', Stuttgart: 'Germany', Walldorf: 'Germany',
+  Paris: 'France', Lyon: 'France',
+  Amsterdam: 'Netherlands', Rotterdam: 'Netherlands', Eindhoven: 'Netherlands', Veldhoven: 'Netherlands',
+  Zurich: 'Switzerland', Geneva: 'Switzerland', Basel: 'Switzerland', Zug: 'Switzerland',
+  Madrid: 'Spain', Barcelona: 'Spain', Milan: 'Italy', Rome: 'Italy',
+  Stockholm: 'Sweden', Copenhagen: 'Denmark', Oslo: 'Norway', Helsinki: 'Finland',
+  Vienna: 'Austria', Brussels: 'Belgium',
+  Lisbon: 'Portugal', Athens: 'Greece', Budapest: 'Hungary', Warsaw: 'Poland', Krakow: 'Poland',
+  Prague: 'Czech Republic', Bucharest: 'Romania', Sofia: 'Bulgaria'
+};
+
+// Returns the matched European country for one location string, or null if it isn't one.
+function matchEuropeanCountry(locStr) {
+  if (!locStr) return null;
+  const direct = EUROPEAN_COUNTRIES.find((c) => locStr.includes(c));
+  if (direct) return direct;
+  for (const alias of Object.keys(COUNTRY_ALIASES)) {
+    if (new RegExp('\\b' + alias.replace(/\./g, '\\.') + '\\b').test(locStr)) return COUNTRY_ALIASES[alias];
+  }
+  for (const city of Object.keys(EU_HUB_CITIES)) {
+    if (locStr.includes(city)) return EU_HUB_CITIES[city];
+  }
+  return null;
+}
+
+// A role only counts as "remote and open to Europe" if it's unrestricted ("Remote") or explicitly
+// says Europe — "Remote in USA" / "Remote in Canada" is remote work restricted to that country's
+// hires and isn't actually open to someone based in Europe, so it's excluded on purpose.
+function isOpenRemote(locStr) {
+  const l = (locStr || '').toLowerCase().trim();
+  if (!l.includes('remote')) return false;
+  if (l === 'remote') return true;
+  return l.includes('europe') || l.includes('emea') || l.includes('worldwide') || l.includes('anywhere');
+}
+
+function isEuropeOrRemoteLocation(locations) {
+  if (!Array.isArray(locations) || !locations.length) return false;
+  return locations.some((loc) => matchEuropeanCountry(loc) || isOpenRemote(loc));
+}
+
+function countriesFromSimplifyLocations(locations) {
+  const found = new Set();
+  let hasOpenRemote = false;
+  (locations || []).forEach((loc) => {
+    const c = matchEuropeanCountry(loc);
+    if (c) found.add(c);
+    else if (isOpenRemote(loc)) hasOpenRemote = true;
+  });
+  if (found.size) return Array.from(found);
+  if (hasOpenRemote) return ['Remote'];
+  return ['Multiple countries'];
+}
+
+async function fetchSimplifyJobsListings() {
+  const now = Date.now();
+  if (simplifyCache.items.length && now - simplifyCache.fetchedAt < LIVE_TTL_MS) {
+    return simplifyCache.items;
+  }
+  try {
+    const res = await fetch(SIMPLIFY_FEED_URL, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; InternRunBot/1.0)' }
+    });
+    if (!res.ok) throw new Error('SimplifyJobs fetch failed: ' + res.status);
+    const raw = await res.json();
+    const items = raw
+      .filter((r) => r && r.active && r.is_visible !== false && isEuropeOrRemoteLocation(r.locations))
+      .map((r) => {
+        const postedMs = (r.date_posted || 0) * 1000;
+        return {
+          id: 'simplify-' + r.id,
+          title: r.title,
+          org: r.company_name,
+          category: mapSimplifyCategory(r.category),
+          location: (r.locations || []).join(' · ') || 'Remote',
+          countries: countriesFromSimplifyLocations(r.locations || []),
+          season: seasonsFromTerms(r.terms),
+          paid: true,
+          note: r.sponsorship && !/^other$/i.test(r.sponsorship) ? 'Visa sponsorship: ' + r.sponsorship : undefined,
+          url: r.url,
+          tag: 'live',
+          isNew: postedMs > 0 && (now - postedMs) < NEW_WINDOW_MS
+        };
+      });
+    // A hiccup here shouldn't wipe out a previously-good cache; only replace on a successful parse.
+    simplifyCache = { items, fetchedAt: now };
+    return items;
+  } catch (e) {
+    return simplifyCache.items;
+  }
+}
+
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Cache-Control', 'no-store');
 
-  const live = await fetchEuCareersHighlights();
+  const [euLive, simplifyLive] = await Promise.all([
+    fetchEuCareersHighlights(),
+    fetchSimplifyJobsListings()
+  ]);
   const curated = CURATED.map((c) => ({ ...c, tag: 'curated' }));
 
   res.status(200).json({
     categories: CATEGORIES,
-    items: [...live, ...curated],
+    items: [...euLive, ...simplifyLive, ...curated],
     checkedAt: new Date().toISOString()
   });
 };
